@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Center node -->
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M54,54m-4.5,0a4.5,4.5 0,1,1 9,0a4.5,4.5 0,1,1 -9,0" />
+
+    <!-- Left side: Snowflake / Cooling crystal (Cyan #00E5FF) -->
+    <!-- Vertical stem up -->
+    <path
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="3.2"
+        android:strokeLineCap="round"
+        android:pathData="M54,49.5 L54,28 M54,36 L47,29 M54,40 L46,35" />
+
+    <!-- Top-left branch -->
+    <path
+        android:strokeColor="#00D2FF"
+        android:strokeWidth="3.2"
+        android:strokeLineCap="round"
+        android:pathData="M50.8,50.8 L33,33 M37,33 L33,40 M42,38 L37,45" />
+
+    <!-- Left horizontal branch -->
+    <path
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="3.2"
+        android:strokeLineCap="round"
+        android:pathData="M49.5,54 L28,54 M36,54 L29,47 M36,54 L29,61" />
+
+    <!-- Bottom-left branch -->
+    <path
+        android:strokeColor="#00D2FF"
+        android:strokeWidth="3.2"
+        android:strokeLineCap="round"
+        android:pathData="M50.8,57.2 L33,75 M37,75 L33,68 M42,70 L37,63" />
+
+    <!-- Bottom stem -->
+    <path
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="3.2"
+        android:strokeLineCap="round"
+        android:pathData="M54,58.5 L54,80 M54,72 L47,79 M54,68 L46,73" />
+
+    <!-- Right side: Organic Produce Leaf (Fresh Green #00E676 & #10B981) -->
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M54,28 C64,28 78,38 78,54 C78,68 66,78 54,80 C56,66 60,54 68,44 C62,48 57,55 54,62 Z" />
+
+    <path
+        android:strokeColor="#A7F3D0"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M54,44 C62,48 68,54 74,60 M60,49 L66,43 M65,56 L72,52" />
+
+    <!-- Sensor telemetry pulses / nodes -->
+    <path
+        android:fillColor="#67E8F9"
+        android:pathData="M27,54m-2.2,0a2.2,2.2 0,1,1 4.4,0a2.2,2.2 0,1,1 -4.4,0" />
+    <path
+        android:fillColor="#6EE7B7"
+        android:pathData="M78,54m-2.2,0a2.2,2.2 0,1,1 4.4,0a2.2,2.2 0,1,1 -4.4,0" />
+</vector>

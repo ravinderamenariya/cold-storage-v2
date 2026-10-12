@@ -1,0 +1,6 @@
+{
+  "name": "GREENCOLD",
+  "description": "GREENCOLD (by Vision X) - Smart Cold Storage, All-India Agri Market Prices & IoT Predictions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
