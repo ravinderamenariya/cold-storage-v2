@@ -36,8 +36,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ui.theme.VisionXTheme
 import com.example.data.model.AlertItem
 import com.example.data.model.ChamberData
 import com.example.data.model.ConnectionMode
@@ -308,5 +310,29 @@ fun DashboardScreen(
                 }
             }
         }
+    }
+}
+
+@PreviewLightDark
+@Composable
+fun DashboardScreenPreview() {
+    VisionXTheme {
+        DashboardScreen(
+            chamber1 = ChamberData("Chamber 1", 12.0, 12.0, 85.0, 85.0, "Normal"),
+            chamber2 = ChamberData("Chamber 2", 4.0, 4.0, 90.0, 90.0, "Normal"),
+            outsideTemp = 28.0,
+            outsideHumidity = 60.0,
+            gasStatus = "Safe",
+            airQuality = "Good",
+            powerData = PowerData(450.0, 78, 12.5, 8.2, 32.0, true, false, "Solar Primary"),
+            crates = emptyList(),
+            alerts = emptyList(),
+            isOnline = true,
+            connectionMode = ConnectionMode.DEMO,
+            onNavigate = {},
+            onCrateClick = {},
+            onAlertClick = {},
+            onDismissAlert = {}
+        )
     }
 }

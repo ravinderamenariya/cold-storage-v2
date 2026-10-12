@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import com.example.data.model.AlertSeverity
 import com.example.data.model.ConnectionMode
 import com.example.ui.theme.VxBorder
+import com.example.ui.theme.VxTheme
 import com.example.ui.theme.VxBorderBlue
 import com.example.ui.theme.VxBorderDanger
 import com.example.ui.theme.VxBorderGreen
@@ -401,10 +402,10 @@ fun StatusBadge(
     modifier: Modifier = Modifier
 ) {
     val (bgColor, textColor, borderColor) = when (status.lowercase()) {
-        "healthy", "normal", "ok", "good" -> Triple(VxSurfaceGreen, VxEmeraldDark, VxBorderGreen)
-        "watch", "warning", "elevated" -> Triple(VxSurfaceWarning, VxWarningDark, VxBorderWarning)
-        "spoiled risk", "critical", "danger" -> Triple(VxSurfaceDanger, VxDangerDark, VxBorderDanger)
-        else -> Triple(VxSurfaceSubtle, VxTextSecondary, VxBorderSubtle)
+        "healthy", "normal", "ok", "good" -> Triple(VxTheme.surfaceGreen, VxTheme.emerald, VxTheme.borderGreen)
+        "watch", "warning", "elevated" -> Triple(VxTheme.surfaceWarning, VxTheme.warningAmber, VxTheme.borderWarning)
+        "spoiled risk", "critical", "danger" -> Triple(VxTheme.surfaceDanger, VxTheme.errorRed, VxTheme.borderDanger)
+        else -> Triple(VxTheme.surfaceSubtle, VxTheme.textSecondary, VxTheme.border)
     }
 
     Box(
@@ -454,13 +455,13 @@ fun EmptyStateCard(
                 modifier = Modifier
                     .size(60.dp)
                     .clip(CircleShape)
-                    .background(VxSurfaceSubtle),
+                    .background(VxTheme.surfaceSubtle),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = VxPrimaryBlue,
+                    tint = VxTheme.primaryBlue,
                     modifier = Modifier.size(32.dp)
                 )
             }

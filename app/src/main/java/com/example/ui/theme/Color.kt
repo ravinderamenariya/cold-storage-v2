@@ -1,5 +1,7 @@
 package com.example.ui.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 // =====================================================================
@@ -73,3 +75,38 @@ val VxSurfaceDarkCard = Color(0xFF1E293B)
 val VxBorderDark = Color(0xFF334155)
 val VxTextPrimaryDark = Color(0xFFF8FAFC)
 val VxTextSecondaryDark = Color(0xFF94A3B8)
+
+object VxTheme {
+    val surfaceSubtle: Color
+        @Composable get() = if (isSystemInDarkTheme()) Color(0xFF1E293B) else Color(0xFFF1F5F9)
+    val surfaceBlue: Color
+        @Composable get() = if (isSystemInDarkTheme()) Color(0xFF1E3A8A) else Color(0xFFEFF6FF)
+    val surfaceGreen: Color
+        @Composable get() = if (isSystemInDarkTheme()) Color(0xFF064E3B) else Color(0xFFF0FDF4)
+    val surfaceWarning: Color
+        @Composable get() = if (isSystemInDarkTheme()) Color(0xFF78350F) else Color(0xFFFFFBEB)
+    val surfaceDanger: Color
+        @Composable get() = if (isSystemInDarkTheme()) Color(0xFF7F1D1D) else Color(0xFFFEF2F2)
+    val surfacePurple: Color
+        @Composable get() = if (isSystemInDarkTheme()) Color(0xFF312E81) else Color(0xFFEEF2FF)
+    val border: Color
+        @Composable get() = if (isSystemInDarkTheme()) Color(0xFF334155) else Color(0xFFE5E7EB)
+    val borderGreen: Color
+        @Composable get() = if (isSystemInDarkTheme()) Color(0xFF065F46) else Color(0xFFBBF7D0)
+    val borderWarning: Color
+        @Composable get() = if (isSystemInDarkTheme()) Color(0xFF92400E) else Color(0xFFFDE68A)
+    val borderDanger: Color
+        @Composable get() = if (isSystemInDarkTheme()) Color(0xFF991B1B) else Color(0xFFFECACA)
+    val textPrimary: Color
+        @Composable get() = if (isSystemInDarkTheme()) Color(0xFFF8FAFC) else Color(0xFF1E293B)
+    val textSecondary: Color
+        @Composable get() = if (isSystemInDarkTheme()) Color(0xFF94A3B8) else Color(0xFF64748B)
+    val emerald: Color
+        @Composable get() = if (isSystemInDarkTheme()) Color(0xFF34D399) else Color(0xFF16A34A)
+    val warningAmber: Color
+        @Composable get() = if (isSystemInDarkTheme()) Color(0xFFFBBF24) else Color(0xFFD97706)
+    val errorRed: Color
+        @Composable get() = if (isSystemInDarkTheme()) Color(0xFFF87171) else Color(0xFFDC2626)
+    val primaryBlue: Color
+        @Composable get() = if (isSystemInDarkTheme()) Color(0xFF6882F2) else Color(0xFF2563EB)
+}
