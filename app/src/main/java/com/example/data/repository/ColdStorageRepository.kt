@@ -57,29 +57,29 @@ class ColdStorageRepository(
     private val _deviceConnected = MutableStateFlow(true)
     val deviceConnected: StateFlow<Boolean> = _deviceConnected.asStateFlow()
 
-    private val _raspberryPiHost = MutableStateFlow("http://192.168.1.105:5000/")
+    private val _raspberryPiHost = MutableStateFlow("http://10.190.234.170:5000/")
     val raspberryPiHost: StateFlow<String> = _raspberryPiHost.asStateFlow()
 
-    // Live Telemetry states
-    private val _chamber1 = MutableStateFlow(ChamberData("Chamber 1", 12.0, 12.0, 62.0, 65.0, "Normal"))
+    // Live Telemetry states (Initialized to unavailable/disconnected until actual API response)
+    private val _chamber1 = MutableStateFlow(ChamberData("Chamber 1", 0.0, 12.0, 0.0, 65.0, "Disconnected", false, false, false))
     val chamber1: StateFlow<ChamberData> = _chamber1.asStateFlow()
 
-    private val _chamber2 = MutableStateFlow(ChamberData("Chamber 2", 4.0, 4.0, 60.0, 60.0, "Normal"))
+    private val _chamber2 = MutableStateFlow(ChamberData("Chamber 2", 0.0, 4.0, 0.0, 60.0, "Disconnected", false, false, false))
     val chamber2: StateFlow<ChamberData> = _chamber2.asStateFlow()
 
-    private val _outsideTemp = MutableStateFlow(28.0)
+    private val _outsideTemp = MutableStateFlow(0.0)
     val outsideTemp: StateFlow<Double> = _outsideTemp.asStateFlow()
 
-    private val _outsideHumidity = MutableStateFlow(62.0)
+    private val _outsideHumidity = MutableStateFlow(0.0)
     val outsideHumidity: StateFlow<Double> = _outsideHumidity.asStateFlow()
 
-    private val _gasStatus = MutableStateFlow("Normal")
+    private val _gasStatus = MutableStateFlow("Unknown")
     val gasStatus: StateFlow<String> = _gasStatus.asStateFlow()
 
-    private val _airQuality = MutableStateFlow("Good")
+    private val _airQuality = MutableStateFlow("Unknown")
     val airQuality: StateFlow<String> = _airQuality.asStateFlow()
 
-    private val _powerData = MutableStateFlow(PowerData())
+    private val _powerData = MutableStateFlow(PowerData(solarInputWatts = 0.0, batteryPercent = 0, isCharging = false))
     val powerData: StateFlow<PowerData> = _powerData.asStateFlow()
 
     private val _lastUpdatedTime = MutableStateFlow(System.currentTimeMillis())
@@ -150,6 +150,16 @@ class ColdStorageRepository(
 
     fun setConnectionMode(mode: ConnectionMode) {
         _connectionMode.value = mode
+        if (mode == ConnectionMode.RASPBERRY_PI) {
+            _deviceConnected.value = false
+            _chamber1.value = _chamber1.value.copy(currentTemp = 0.0, humidity = 0.0, status = "Disconnected", coolingActive = false, fanActive = false)
+            _chamber2.value = _chamber2.value.copy(currentTemp = 0.0, humidity = 0.0, status = "Disconnected", coolingActive = false, fanActive = false)
+            _outsideTemp.value = 0.0
+            _outsideHumidity.value = 0.0
+            _gasStatus.value = "Unknown"
+            _coolingActive.value = false
+            _fansActive.value = false
+        }
     }
 
     fun setOnline(online: Boolean) {
@@ -165,15 +175,41 @@ class ColdStorageRepository(
     }
 
     fun toggleCooling(enabled: Boolean) {
-        _coolingActive.value = enabled
-        _chamber1.value = _chamber1.value.copy(coolingActive = enabled)
-        _chamber2.value = _chamber2.value.copy(coolingActive = enabled)
+        if (_connectionMode.value == ConnectionMode.RASPBERRY_PI) {
+            coroutineScope.launch(Dispatchers.IO) {
+                try {
+                    val response = raspberryPiApi?.toggleCooling(enabled)
+                    if (response != null && response.isSuccessful) {
+                        _coolingActive.value = enabled
+                        _chamber1.value = _chamber1.value.copy(coolingActive = enabled)
+                        _chamber2.value = _chamber2.value.copy(coolingActive = enabled)
+                    }
+                } catch (_: Exception) {}
+            }
+        } else {
+            _coolingActive.value = enabled
+            _chamber1.value = _chamber1.value.copy(coolingActive = enabled)
+            _chamber2.value = _chamber2.value.copy(coolingActive = enabled)
+        }
     }
 
     fun toggleFans(enabled: Boolean) {
-        _fansActive.value = enabled
-        _chamber1.value = _chamber1.value.copy(fanActive = enabled)
-        _chamber2.value = _chamber2.value.copy(fanActive = enabled)
+        if (_connectionMode.value == ConnectionMode.RASPBERRY_PI) {
+            coroutineScope.launch(Dispatchers.IO) {
+                try {
+                    val response = raspberryPiApi?.toggleFans(enabled)
+                    if (response != null && response.isSuccessful) {
+                        _fansActive.value = enabled
+                        _chamber1.value = _chamber1.value.copy(fanActive = enabled)
+                        _chamber2.value = _chamber2.value.copy(fanActive = enabled)
+                    }
+                } catch (_: Exception) {}
+            }
+        } else {
+            _fansActive.value = enabled
+            _chamber1.value = _chamber1.value.copy(fanActive = enabled)
+            _chamber2.value = _chamber2.value.copy(fanActive = enabled)
+        }
     }
 
     /**
@@ -205,12 +241,17 @@ class ColdStorageRepository(
         val api = raspberryPiApi
         if (api == null) {
             _deviceConnected.value = false
+            _chamber1.value = _chamber1.value.copy(status = "Disconnected", currentTemp = 0.0, humidity = 0.0)
+            _chamber2.value = _chamber2.value.copy(status = "Disconnected", currentTemp = 0.0, humidity = 0.0)
             return
         }
 
         try {
+            // Verify health endpoint and fetch live telemetry
+            val healthResponse = api.getSystemHealth()
             val response = api.getLiveTelemetry()
-            if (response.isSuccessful && response.body() != null) {
+
+            if (healthResponse.isSuccessful && response.isSuccessful && response.body() != null) {
                 val data = response.body()!!
                 _deviceConnected.value = true
                 _lastUpdatedTime.value = System.currentTimeMillis()
@@ -218,29 +259,29 @@ class ColdStorageRepository(
                 _chamber1.value = _chamber1.value.copy(
                     currentTemp = data.chamber1.temperature,
                     humidity = data.chamber1.humidity,
-                    status = if (abs(data.chamber1.temperature - 12.0) <= 2.0) "Normal" else "Warning",
+                    status = if (data.chamber1.temperature == 0.0) "Unavailable" else if (abs(data.chamber1.temperature - 12.0) <= 2.0) "Normal" else "Warning",
                     coolingActive = data.cooling,
                     fanActive = data.fans,
-                    doorOpen = data.door1
+                    doorOpen = data.doorOpen
                 )
 
                 _chamber2.value = _chamber2.value.copy(
                     currentTemp = data.chamber2.temperature,
                     humidity = data.chamber2.humidity,
-                    status = if (abs(data.chamber2.temperature - 4.0) <= 2.0) "Normal" else "Warning",
+                    status = if (data.chamber2.temperature == 0.0) "Unavailable" else if (abs(data.chamber2.temperature - 4.0) <= 2.0) "Normal" else "Warning",
                     coolingActive = data.cooling,
                     fanActive = data.fans,
-                    doorOpen = data.door2
+                    doorOpen = data.doorOpen
                 )
 
                 _outsideTemp.value = data.outside.temperature
                 _outsideHumidity.value = data.outside.humidity
-                _gasStatus.value = if (data.gas1.equals("normal", true)) "Normal" else "Elevated"
+                _gasStatus.value = if (data.gasStatus.equals("normal", true)) "Normal" else "Elevated"
                 _coolingActive.value = data.cooling
                 _fansActive.value = data.fans
 
                 _powerData.value = _powerData.value.copy(
-                    solarInputWatts = data.solarPower.toDouble(),
+                    solarInputWatts = data.solarPower,
                     batteryPercent = data.battery,
                     isCharging = data.solarPower > 100
                 )
@@ -248,9 +289,13 @@ class ColdStorageRepository(
                 recordSensorSnapshot()
             } else {
                 _deviceConnected.value = false
+                _chamber1.value = _chamber1.value.copy(status = "Disconnected", currentTemp = 0.0, humidity = 0.0)
+                _chamber2.value = _chamber2.value.copy(status = "Disconnected", currentTemp = 0.0, humidity = 0.0)
             }
         } catch (_: Exception) {
             _deviceConnected.value = false
+            _chamber1.value = _chamber1.value.copy(status = "Disconnected", currentTemp = 0.0, humidity = 0.0)
+            _chamber2.value = _chamber2.value.copy(status = "Disconnected", currentTemp = 0.0, humidity = 0.0)
         }
     }
 
