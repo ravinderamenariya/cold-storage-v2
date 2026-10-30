@@ -34,10 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.AppDestination
-import com.example.ui.theme.VxBorder
-import com.example.ui.theme.VxDangerRed
-import com.example.ui.theme.VxPrimaryBlue
-import com.example.ui.theme.VxSurfaceBlue
+import com.example.ui.theme.VxTheme
 import com.example.util.AppTranslations
 import com.example.util.IndianLanguage
 
@@ -115,7 +112,7 @@ fun VisionXBottomNavBar(
 
     Surface(
         color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, VxBorder),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         tonalElevation = 0.dp,
         modifier = modifier.fillMaxWidth()
     ) {
@@ -156,7 +153,7 @@ fun VisionXBottomNavBar(
                             BadgedBox(
                                 badge = {
                                     Badge(
-                                        containerColor = VxDangerRed,
+                                        containerColor = VxTheme.errorRed,
                                         contentColor = Color.White
                                     ) {
                                         Text(text = "$unreadAlertCount", fontSize = 10.sp)
@@ -187,9 +184,9 @@ fun VisionXBottomNavBar(
                     },
                     alwaysShowLabel = true,
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = VxPrimaryBlue,
-                        selectedTextColor = VxPrimaryBlue,
-                        indicatorColor = VxSurfaceBlue,
+                        selectedIconColor = VxTheme.primaryBlue,
+                        selectedTextColor = VxTheme.primaryBlue,
+                        indicatorColor = VxTheme.surfaceBlue,
                         unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                     ),

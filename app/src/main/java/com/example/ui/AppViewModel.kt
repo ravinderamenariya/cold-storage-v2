@@ -121,9 +121,18 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun setLocationManually(cityName: String, stateName: String, nearestMandi: String, multiplier: Float) {
-        locationService.setLocation(cityName, stateName, nearestMandi, multiplier)
+    fun setLocationManually(cityName: String, stateName: String, nearestMandi: String, multiplier: Float, lat: Double = 28.6139, lng: Double = 77.2090) {
+        locationService.setLocation(cityName, stateName, nearestMandi, multiplier, lat, lng)
     }
+
+    // Gemini 3.8 Flash AI Service
+    private val geminiAiService = com.example.data.ai.GeminiAiService()
+
+    private val _geminiPrediction = MutableStateFlow<com.example.data.ai.GeminiMarketPrediction?>(null)
+    val geminiPrediction: StateFlow<com.example.data.ai.GeminiMarketPrediction?> = _geminiPrediction.asStateFlow()
+
+    private val _isPredictingWithAi = MutableStateFlow(false)
+    val isPredictingWithAi: StateFlow<Boolean> = _isPredictingWithAi.asStateFlow()
 
     // AI Prediction State
     private val _lastPrediction = MutableStateFlow<ShelfLifePrediction?>(null)
@@ -173,17 +182,36 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun askVoiceQuery(query: String) {
-        val answer = voiceAssistant.processVoiceQuery(
-            query = query,
-            language = selectedLanguage.value,
-            c1Temp = chamber1.value.currentTemp,
-            c2Temp = chamber2.value.currentTemp,
-            batteryPercent = powerData.value.batteryPercent,
-            solarWatts = powerData.value.solarInputWatts,
-            gasStatus = gasStatus.value,
-            activeCratesCount = allCrates.value.size
-        )
-        voiceAssistant.speak(answer, selectedLanguage.value)
+        viewModelScope.launch {
+            val answer = try {
+                geminiAiService.askAssistant(
+                    userQuery = query,
+                    language = selectedLanguage.value,
+                    c1Temp = chamber1.value.currentTemp,
+                    c2Temp = chamber2.value.currentTemp,
+                    humidityC1 = chamber1.value.humidity,
+                    humidityC2 = chamber2.value.humidity,
+                    outsideTemp = outsideTemp.value,
+                    batteryPercent = powerData.value.batteryPercent,
+                    solarWatts = powerData.value.solarInputWatts,
+                    gasStatus = gasStatus.value,
+                    activeCrates = allCrates.value,
+                    nearestMandi = currentLocation.value.nearestMandi
+                )
+            } catch (e: Exception) {
+                voiceAssistant.processVoiceQuery(
+                    query = query,
+                    language = selectedLanguage.value,
+                    c1Temp = chamber1.value.currentTemp,
+                    c2Temp = chamber2.value.currentTemp,
+                    batteryPercent = powerData.value.batteryPercent,
+                    solarWatts = powerData.value.solarInputWatts,
+                    gasStatus = gasStatus.value,
+                    activeCratesCount = allCrates.value.size
+                )
+            }
+            voiceAssistant.speak(answer, selectedLanguage.value)
+        }
     }
 
     fun speakText(text: String) {
@@ -318,5 +346,31 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             currentHumidity = currentH
         )
         _lastPrediction.value = result
+
+        // Launch Gemini 3.8 Flash AI prediction
+        viewModelScope.launch {
+            _isPredictingWithAi.value = true
+            try {
+                val matchedCrop = com.example.data.model.IndianAgriMarketCatalog.findByName(product)
+                val geminiRes = geminiAiService.predictMarketAndShelfLife(
+                    product = product,
+                    harvestDate = harvestDate,
+                    chamber = chamber,
+                    currentTemp = currentT,
+                    currentHumidity = currentH,
+                    optimalTemp = matchedCrop?.optimalTemp ?: 10.0,
+                    optimalHumidity = matchedCrop?.optimalHumidity ?: 85.0,
+                    baseDays = matchedCrop?.baseShelfLifeDays ?: 14,
+                    nearestMandi = currentLocation.value.nearestMandi,
+                    currentPrice = matchedCrop?.currentPricePerKgOrUnit?.toDouble() ?: 30.0,
+                    priceUnit = matchedCrop?.unit ?: "kg"
+                )
+                _geminiPrediction.value = geminiRes
+            } catch (e: Exception) {
+                android.util.Log.w("AppViewModel", "Gemini prediction error: ${e.message}")
+            } finally {
+                _isPredictingWithAi.value = false
+            }
+        }
     }
 }

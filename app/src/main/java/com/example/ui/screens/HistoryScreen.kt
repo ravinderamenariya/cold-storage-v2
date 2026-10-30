@@ -48,6 +48,7 @@ import com.example.ui.theme.VxSurfaceBlue
 import com.example.ui.theme.VxSurfaceGreen
 import com.example.ui.theme.VxSurfaceSubtle
 import com.example.ui.theme.VxSurfaceWarning
+import com.example.ui.theme.VxTheme
 import com.example.ui.theme.VxWarningAmber
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -100,7 +101,7 @@ fun HistoryScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(10.dp))
-                        .background(VxSurfaceSubtle)
+                        .background(VxTheme.surfaceSubtle)
                         .padding(3.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -109,7 +110,7 @@ fun HistoryScreen(
                         Surface(
                             onClick = { selectedMetricTab = tab },
                             shape = RoundedCornerShape(8.dp),
-                            color = if (isSelected) VxPrimaryBlue else Color.Transparent,
+                            color = if (isSelected) VxTheme.primaryBlue else Color.Transparent,
                             modifier = Modifier
                                 .weight(1f)
                                 .testTag("tab_metric_$tab")
@@ -138,10 +139,10 @@ fun HistoryScreen(
                         Surface(
                             onClick = { selectedChamberFilter = chamber },
                             shape = RoundedCornerShape(16.dp),
-                            color = if (isSelected) VxPrimaryBlue else MaterialTheme.colorScheme.surface,
+                            color = if (isSelected) VxTheme.primaryBlue else MaterialTheme.colorScheme.surface,
                             border = BorderStroke(
                                 1.dp,
-                                if (isSelected) VxPrimaryBlue else MaterialTheme.colorScheme.outline
+                                if (isSelected) VxTheme.primaryBlue else MaterialTheme.colorScheme.outline
                             ),
                             modifier = Modifier.testTag("filter_chamber_$chamber")
                         ) {
@@ -195,10 +196,10 @@ fun HistoryScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            StatBox(label = "Min", value = "${String.format("%.1f", minC1)}°C", color = VxPrimaryBlue)
-                            StatBox(label = "Max", value = "${String.format("%.1f", maxC1)}°C", color = VxWarningAmber)
-                            StatBox(label = "Average", value = "${String.format("%.1f", avgC1)}°C", color = VxEmeraldDark)
-                            StatBox(label = "Latest", value = "${String.format("%.1f", latestC1)}°C", color = VxNavy)
+                            StatBox(label = "Min", value = "${String.format("%.1f", minC1)}°C", color = VxTheme.primaryBlue)
+                            StatBox(label = "Max", value = "${String.format("%.1f", maxC1)}°C", color = VxTheme.warningDark)
+                            StatBox(label = "Average", value = "${String.format("%.1f", avgC1)}°C", color = VxTheme.emeraldDark)
+                            StatBox(label = "Latest", value = "${String.format("%.1f", latestC1)}°C", color = VxTheme.primaryBlue)
                         }
                     }
                 }
@@ -228,14 +229,14 @@ fun HistoryScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(6.dp))
-                                .background(VxSurfaceSubtle)
+                                .background(VxTheme.surfaceSubtle)
                                 .padding(horizontal = 8.dp, vertical = 6.dp),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(text = "Time", fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                            Text(text = "C1 (°C)", fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                            Text(text = "C2 (°C)", fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                            Text(text = "Outside (°C)", fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                            Text(text = "Time", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
+                            Text(text = "C1 (°C)", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
+                            Text(text = "C2 (°C)", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
+                            Text(text = "Outside (°C)", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
                         }
 
                         Spacer(modifier = Modifier.height(6.dp))
@@ -268,14 +269,14 @@ fun HistoryScreen(
                                     text = "${item.chamber1Temp}",
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = VxPrimaryBlue,
+                                    color = VxTheme.primaryBlue,
                                     modifier = Modifier.weight(1f)
                                 )
                                 Text(
                                     text = "${item.chamber2Temp}",
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = VxEmerald,
+                                    color = VxTheme.emeraldDark,
                                     modifier = Modifier.weight(1f)
                                 )
                                 Text(

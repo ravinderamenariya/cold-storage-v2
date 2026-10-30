@@ -85,6 +85,7 @@ import com.example.ui.theme.VxSurfaceGreen
 import com.example.ui.theme.VxSurfacePurple
 import com.example.ui.theme.VxSurfaceSubtle
 import com.example.ui.theme.VxSurfaceWarning
+import com.example.ui.theme.VxTheme
 import com.example.ui.theme.VxWarningAmber
 import kotlinx.coroutines.launch
 
@@ -135,8 +136,8 @@ fun AppNavigation(
     if (showLocationSheet) {
         com.example.ui.components.LocationSelectionBottomSheet(
             currentLocation = currentLocation,
-            onSelectLocation = { city, state, mandi, mult ->
-                viewModel.setLocationManually(city, state, mandi, mult)
+            onSelectLocation = { city, state, mandi, mult, lat, lng ->
+                viewModel.setLocationManually(city, state, mandi, mult, lat, lng)
                 showLocationSheet = false
             },
             onDetectGpsLocation = {
@@ -327,10 +328,14 @@ fun AppNavigation(
 
                 AppDestination.AI_PREDICTION -> {
                     val currentLocation by viewModel.currentLocation.collectAsState()
+                    val geminiPrediction by viewModel.geminiPrediction.collectAsState()
+                    val isPredictingWithAi by viewModel.isPredictingWithAi.collectAsState()
                     PredictionScreen(
                         chamber1 = chamber1,
                         chamber2 = chamber2,
                         lastPrediction = lastPrediction,
+                        geminiPrediction = geminiPrediction,
+                        isAiPredicting = isPredictingWithAi,
                         isOnline = isOnline,
                         marketProduces = marketProduces,
                         currentLocationInfo = currentLocation,
@@ -461,8 +466,8 @@ fun AppNavigation(
                     icon = Icons.Default.Mic,
                     title = "Kisan Voice Assistant",
                     subtitle = "बोलने वाला साथी - Indian languages speech Q&A",
-                    iconColor = VxPrimaryBlue,
-                    bgColor = VxSurfaceBlue,
+                    iconColor = VxTheme.primaryBlue,
+                    bgColor = VxTheme.surfaceBlue,
                     onClick = {
                         coroutineScope.launch { sheetState.hide() }
                         showMoreSheet = false
@@ -474,8 +479,8 @@ fun AppNavigation(
                     icon = Icons.Default.Sensors,
                     title = "Live Monitoring",
                     subtitle = "Real-time dual chamber & sensor telemetry",
-                    iconColor = VxPrimaryBlue,
-                    bgColor = VxSurfaceBlue,
+                    iconColor = VxTheme.primaryBlue,
+                    bgColor = VxTheme.surfaceBlue,
                     onClick = {
                         coroutineScope.launch { sheetState.hide() }
                         showMoreSheet = false
@@ -487,8 +492,8 @@ fun AppNavigation(
                     icon = Icons.Default.SolarPower,
                     title = "Solar & Power",
                     subtitle = "Solar PV, Battery 78%, and MPPT Power Flow",
-                    iconColor = VxWarningAmber,
-                    bgColor = VxSurfaceWarning,
+                    iconColor = VxTheme.warningDark,
+                    bgColor = VxTheme.surfaceWarning,
                     onClick = {
                         coroutineScope.launch { sheetState.hide() }
                         showMoreSheet = false
@@ -500,8 +505,8 @@ fun AppNavigation(
                     icon = Icons.Default.AutoAwesome,
                     title = "AI Prediction",
                     subtitle = "Produce shelf-life modeling & degradation forecast",
-                    iconColor = VxPurple,
-                    bgColor = VxSurfacePurple,
+                    iconColor = VxTheme.purple,
+                    bgColor = VxTheme.surfacePurple,
                     onClick = {
                         coroutineScope.launch { sheetState.hide() }
                         showMoreSheet = false
@@ -513,8 +518,8 @@ fun AppNavigation(
                     icon = Icons.Default.DeveloperBoard,
                     title = "Device Connection",
                     subtitle = "Configure Raspberry Pi 5 IP & sync mode",
-                    iconColor = VxEmerald,
-                    bgColor = VxSurfaceGreen,
+                    iconColor = VxTheme.emeraldDark,
+                    bgColor = VxTheme.surfaceGreen,
                     onClick = {
                         coroutineScope.launch { sheetState.hide() }
                         showMoreSheet = false
@@ -526,8 +531,8 @@ fun AppNavigation(
                     icon = Icons.Default.Info,
                     title = "Pi & Database Guide",
                     subtitle = "Wiring diagrams, SQLite schema & Python server",
-                    iconColor = VxPrimaryBlue,
-                    bgColor = VxSurfaceBlue,
+                    iconColor = VxTheme.primaryBlue,
+                    bgColor = VxTheme.surfaceBlue,
                     onClick = {
                         coroutineScope.launch { sheetState.hide() }
                         showMoreSheet = false
@@ -539,8 +544,8 @@ fun AppNavigation(
                     icon = Icons.Default.Settings,
                     title = "Settings",
                     subtitle = "Preferences, notifications, and profile",
-                    iconColor = VxNavy,
-                    bgColor = VxSurfaceSubtle,
+                    iconColor = VxTheme.primaryBlue,
+                    bgColor = VxTheme.surfaceSubtle,
                     onClick = {
                         coroutineScope.launch { sheetState.hide() }
                         showMoreSheet = false

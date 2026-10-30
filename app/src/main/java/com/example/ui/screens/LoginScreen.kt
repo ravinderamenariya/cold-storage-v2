@@ -81,6 +81,7 @@ import com.example.ui.theme.VxSurfaceSubtle
 import com.example.ui.theme.VxTextMuted
 import com.example.ui.theme.VxTextPrimary
 import com.example.ui.theme.VxTextSecondary
+import com.example.ui.theme.VxTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -144,20 +145,20 @@ fun LoginScreen(
                     modifier = Modifier
                         .size(44.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(VxNavy),
+                        .background(VxTheme.navy),
                     contentAlignment = Alignment.Center
                 ) {
                     Row {
                         Icon(
                             imageVector = Icons.Default.AcUnit,
                             contentDescription = null,
-                            tint = VxCyanAccent,
+                            tint = VxTheme.cyanAccent,
                             modifier = Modifier.size(20.dp)
                         )
                         Icon(
                             imageVector = Icons.Default.Eco,
                             contentDescription = null,
-                            tint = VxEmeraldAccent,
+                            tint = VxTheme.emeraldAccent,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -206,18 +207,29 @@ fun LoginScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xFFFEE2E2))
+                        .background(MaterialTheme.colorScheme.errorContainer)
                         .padding(12.dp)
                 ) {
                     Text(
                         text = errorMessage!!,
-                        color = VxDangerRed,
+                        color = MaterialTheme.colorScheme.error,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Medium
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
             }
+
+            val loginFieldColors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = VxTheme.primaryBlue,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                focusedLabelColor = VxTheme.primaryBlue,
+                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface
+            )
 
             // Username Field
             OutlinedTextField(
@@ -231,7 +243,7 @@ fun LoginScreen(
                     Icon(
                         imageVector = Icons.Default.Person,
                         contentDescription = null,
-                        tint = VxPrimaryBlue
+                        tint = VxTheme.primaryBlue
                     )
                 },
                 singleLine = true,
@@ -240,10 +252,7 @@ fun LoginScreen(
                     imeAction = ImeAction.Next
                 ),
                 shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = VxPrimaryBlue,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                ),
+                colors = loginFieldColors,
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("login_username_input")
@@ -263,7 +272,7 @@ fun LoginScreen(
                     Icon(
                         imageVector = Icons.Default.Lock,
                         contentDescription = null,
-                        tint = VxPrimaryBlue
+                        tint = VxTheme.primaryBlue
                     )
                 },
                 trailingIcon = {
@@ -283,10 +292,7 @@ fun LoginScreen(
                 ),
                 keyboardActions = KeyboardActions(onDone = { attemptLogin() }),
                 shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = VxPrimaryBlue,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                ),
+                colors = loginFieldColors,
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("login_password_input")
@@ -305,7 +311,7 @@ fun LoginScreen(
                         checked = rememberMe,
                         onCheckedChange = { rememberMe = it },
                         colors = CheckboxDefaults.colors(
-                            checkedColor = VxPrimaryBlue
+                            checkedColor = VxTheme.primaryBlue
                         ),
                         modifier = Modifier.testTag("remember_me_checkbox")
                     )
@@ -320,7 +326,7 @@ fun LoginScreen(
                     Text(
                         text = "Forgot password?",
                         fontSize = 13.sp,
-                        color = VxPrimaryBlue,
+                        color = VxTheme.primaryBlue,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
@@ -333,7 +339,7 @@ fun LoginScreen(
                 onClick = { attemptLogin() },
                 enabled = !isLoading,
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = VxNavy),
+                colors = ButtonDefaults.buttonColors(containerColor = VxTheme.primaryBlue),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
@@ -379,9 +385,9 @@ fun LoginScreen(
                     onLoginSuccess("Offline Operator", true)
                 },
                 shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, VxPrimaryBlue),
+                border = BorderStroke(1.dp, VxTheme.primaryBlue),
                 colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = VxPrimaryBlue
+                    contentColor = VxTheme.primaryBlue
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -414,7 +420,7 @@ fun LoginScreen(
             Text(
                 text = "Demo Credentials: ravindera / password123",
                 fontSize = 11.sp,
-                color = VxPrimaryBlue,
+                color = VxTheme.primaryBlue,
                 modifier = Modifier.padding(top = 4.dp)
             )
         }

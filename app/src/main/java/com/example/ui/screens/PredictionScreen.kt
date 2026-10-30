@@ -83,8 +83,14 @@ import com.example.ui.theme.VxSurfaceSubtle
 import com.example.ui.theme.VxSurfaceWarning
 import com.example.ui.theme.VxTextPrimary
 import com.example.ui.theme.VxTextSecondary
+import com.example.ui.theme.VxTheme
 import com.example.ui.theme.VxWarningAmber
 import com.example.ui.theme.VxWarningDark
+import com.example.data.ai.GeminiMarketPrediction
+import com.example.data.model.MandiCatalog
+import com.example.data.model.MandiLocation
+import com.example.ui.components.GoogleMandiMapView
+import androidx.compose.material3.CircularProgressIndicator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,6 +98,8 @@ fun PredictionScreen(
     chamber1: ChamberData,
     chamber2: ChamberData,
     lastPrediction: ShelfLifePrediction?,
+    geminiPrediction: GeminiMarketPrediction? = null,
+    isAiPredicting: Boolean = false,
     isOnline: Boolean,
     marketProduces: List<IndianAgriProduce> = IndianAgriMarketCatalog.allProduces,
     currentLocationInfo: com.example.util.UserLocationInfo? = null,
@@ -155,8 +163,8 @@ fun PredictionScreen(
             // Automatic Price Alert Banner
             Surface(
                 shape = RoundedCornerShape(12.dp),
-                color = VxSurfaceGreen,
-                border = BorderStroke(1.dp, VxBorderGreen),
+                color = VxTheme.surfaceGreen,
+                border = BorderStroke(1.dp, VxTheme.borderGreen),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -167,7 +175,7 @@ fun PredictionScreen(
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(VxEmeraldDark),
+                            .background(VxTheme.emeraldDark),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -183,12 +191,12 @@ fun PredictionScreen(
                             text = "🔔 ऑटो मंडी भाव अलर्ट (Auto Price Spike Alerts Active)",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = VxEmeraldDark
+                            color = VxTheme.emeraldDark
                         )
                         Text(
                             text = "जैसे ही किसी फल/सब्जी/फूल के भाव 10%+ बढ़ेंगे, ऐप नोटिफिकेशन में तुरंत अलर्ट आएगा।",
                             fontSize = 11.sp,
-                            color = VxTextPrimary
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -201,7 +209,7 @@ fun PredictionScreen(
                 text = "📍 अपनी लोकेशन या मंडी चुनें (Select Location / Mandi):",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
-                color = VxTextPrimary
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(6.dp))
             ExposedDropdownMenuBox(
@@ -215,8 +223,12 @@ fun PredictionScreen(
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isMandiDropdownExpanded) },
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = VxPrimaryBlue,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                        focusedBorderColor = VxTheme.primaryBlue,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -230,7 +242,7 @@ fun PredictionScreen(
                 ) {
                     mandiLocations.forEach { pair ->
                         DropdownMenuItem(
-                            text = { Text(pair.first, fontWeight = FontWeight.Medium, fontSize = 13.sp) },
+                            text = { Text(pair.first, fontWeight = FontWeight.Medium, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface) },
                             onClick = {
                                 selectedMandiPair = pair
                                 isMandiDropdownExpanded = false
@@ -243,16 +255,17 @@ fun PredictionScreen(
             Spacer(modifier = Modifier.height(8.dp))
             Button(
                 onClick = onDetectLocation,
-                colors = ButtonDefaults.buttonColors(containerColor = VxPrimaryBlue),
+                colors = ButtonDefaults.buttonColors(containerColor = VxTheme.primaryBlue),
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier.fillMaxWidth().testTag("detect_location_button")
             ) {
-                Icon(imageVector = Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(18.dp))
+                Icon(imageVector = Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color.White)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = if (currentLocationInfo != null) "🛰️ डिटेक्टेड शहर: ${currentLocationInfo.cityName}, ${currentLocationInfo.stateName} (रीफ्रेश करें)" else "🛰️ वर्तमान लोकेशन डिटेक्ट करें (Auto-Detect City & Rates)",
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
                 )
             }
 
@@ -263,7 +276,7 @@ fun PredictionScreen(
                 text = "फसल श्रेणी चुनें (Crop Category):",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
-                color = VxTextPrimary
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(6.dp))
             LazyRow(
@@ -275,14 +288,14 @@ fun PredictionScreen(
                     Surface(
                         onClick = { selectedCategory = null },
                         shape = RoundedCornerShape(16.dp),
-                        color = if (isAll) VxPrimaryBlue else MaterialTheme.colorScheme.surface,
-                        border = BorderStroke(1.dp, if (isAll) VxPrimaryBlue else VxBorder)
+                        color = if (isAll) VxTheme.primaryBlue else MaterialTheme.colorScheme.surface,
+                        border = BorderStroke(1.dp, if (isAll) VxTheme.primaryBlue else MaterialTheme.colorScheme.outline)
                     ) {
                         Text(
                             text = "🌾 सभी (All 32+)",
                             fontSize = 12.sp,
                             fontWeight = if (isAll) FontWeight.Bold else FontWeight.Medium,
-                            color = if (isAll) Color.White else VxTextPrimary,
+                            color = if (isAll) Color.White else MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                         )
                     }
@@ -293,8 +306,8 @@ fun PredictionScreen(
                     Surface(
                         onClick = { selectedCategory = cat },
                         shape = RoundedCornerShape(16.dp),
-                        color = if (isSel) VxPrimaryBlue else MaterialTheme.colorScheme.surface,
-                        border = BorderStroke(1.dp, if (isSel) VxPrimaryBlue else VxBorder)
+                        color = if (isSel) VxTheme.primaryBlue else MaterialTheme.colorScheme.surface,
+                        border = BorderStroke(1.dp, if (isSel) VxTheme.primaryBlue else MaterialTheme.colorScheme.outline)
                     ) {
                         val icon = when (cat) {
                             CropCategory.VEGETABLE -> "🥦"
@@ -305,7 +318,7 @@ fun PredictionScreen(
                             text = "$icon ${cat.labelHindi} (${cat.labelEnglish})",
                             fontSize = 12.sp,
                             fontWeight = if (isSel) FontWeight.Bold else FontWeight.Medium,
-                            color = if (isSel) Color.White else VxTextPrimary,
+                            color = if (isSel) Color.White else MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                         )
                     }
@@ -342,8 +355,12 @@ fun PredictionScreen(
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isProduceDropdownExpanded) },
                             shape = RoundedCornerShape(12.dp),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = VxPrimaryBlue,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                                focusedBorderColor = VxTheme.primaryBlue,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surface
                             ),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -370,24 +387,25 @@ fun PredictionScreen(
                                                     Text(
                                                         text = "${prod.nameHindi} (${prod.nameEnglish})",
                                                         fontWeight = FontWeight.Bold,
-                                                        fontSize = 13.sp
+                                                        fontSize = 13.sp,
+                                                        color = MaterialTheme.colorScheme.onSurface
                                                     )
                                                     Text(
                                                         text = "${prod.majorState} • ${prod.category.labelEnglish}",
                                                         fontSize = 11.sp,
-                                                        color = VxTextSecondary
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                                     )
                                                 }
                                             }
                                             Surface(
-                                                color = VxSurfaceGreen,
+                                                color = VxTheme.surfaceGreen,
                                                 shape = RoundedCornerShape(6.dp)
                                             ) {
                                                 Text(
                                                     text = "₹${prod.currentPricePerKgOrUnit}/${prod.unit} (+${prod.priceTrendPercent}%)",
                                                     fontSize = 11.sp,
                                                     fontWeight = FontWeight.Bold,
-                                                    color = VxEmeraldDark,
+                                                    color = VxTheme.emeraldDark,
                                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                                 )
                                             }
@@ -410,8 +428,8 @@ fun PredictionScreen(
                     // Live Market Price Info Strip
                     Surface(
                         shape = RoundedCornerShape(10.dp),
-                        color = VxSurfaceSubtle,
-                        border = BorderStroke(1.dp, VxBorder),
+                        color = VxTheme.surfaceSubtle,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Row(
@@ -423,24 +441,24 @@ fun PredictionScreen(
                                 Text(
                                     text = "वर्तमान मंडी भाव (Current Mandi Price):",
                                     fontSize = 11.sp,
-                                    color = VxTextSecondary
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
                                     text = "₹${localizedPrice} प्रति ${selectedProduce.unit}",
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = VxPrimaryBlue
+                                    color = VxTheme.primaryBlue
                                 )
                                 Text(
                                     text = "चयनित मंडी: ${selectedMandiPair.first}",
                                     fontSize = 10.sp,
-                                    color = VxTextSecondary
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             Surface(
                                 shape = RoundedCornerShape(8.dp),
-                                color = if (selectedProduce.priceTrendPercent >= 0) VxSurfaceGreen else VxSurfaceDanger,
-                                border = BorderStroke(1.dp, if (selectedProduce.priceTrendPercent >= 0) VxBorderGreen else VxBorder)
+                                color = if (selectedProduce.priceTrendPercent >= 0) VxTheme.surfaceGreen else MaterialTheme.colorScheme.errorContainer,
+                                border = BorderStroke(1.dp, if (selectedProduce.priceTrendPercent >= 0) VxTheme.borderGreen else MaterialTheme.colorScheme.error)
                             ) {
                                 Row(
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -449,7 +467,7 @@ fun PredictionScreen(
                                     Icon(
                                         imageVector = Icons.Default.TrendingUp,
                                         contentDescription = null,
-                                        tint = if (selectedProduce.priceTrendPercent >= 0) VxEmeraldDark else VxDangerRed,
+                                        tint = if (selectedProduce.priceTrendPercent >= 0) VxTheme.emeraldDark else MaterialTheme.colorScheme.error,
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
@@ -457,7 +475,7 @@ fun PredictionScreen(
                                         text = "+${selectedProduce.priceTrendPercent}% भाव बढ़ा",
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = if (selectedProduce.priceTrendPercent >= 0) VxEmeraldDark else VxDangerRed
+                                        color = if (selectedProduce.priceTrendPercent >= 0) VxTheme.emeraldDark else MaterialTheme.colorScheme.error
                                     )
                                 }
                             }
@@ -481,14 +499,18 @@ fun PredictionScreen(
                             Icon(
                                 imageVector = Icons.Default.CalendarMonth,
                                 contentDescription = null,
-                                tint = VxPrimaryBlue
+                                tint = VxTheme.primaryBlue
                             )
                         },
                         singleLine = true,
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = VxPrimaryBlue,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                            focusedBorderColor = VxTheme.primaryBlue,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
@@ -516,8 +538,12 @@ fun PredictionScreen(
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isChamberDropdownExpanded) },
                             shape = RoundedCornerShape(12.dp),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = VxPrimaryBlue,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                                focusedBorderColor = VxTheme.primaryBlue,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surface
                             ),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -531,7 +557,7 @@ fun PredictionScreen(
                         ) {
                             chamberList.forEach { ch ->
                                 DropdownMenuItem(
-                                    text = { Text(ch) },
+                                    text = { Text(ch, color = MaterialTheme.colorScheme.onSurface) },
                                     onClick = {
                                         selectedChamber = ch
                                         isChamberDropdownExpanded = false
@@ -545,8 +571,9 @@ fun PredictionScreen(
 
                     // Current Telemetry Overview Box
                     Surface(
-                        color = VxSurfaceSubtle,
+                        color = VxTheme.surfaceSubtle,
                         shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
@@ -562,7 +589,7 @@ fun PredictionScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(text = "कमरे का तापमान:", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text(text = "${currentChamberData.currentTemp}°C", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = VxPrimaryBlue)
+                                Text(text = "${currentChamberData.currentTemp}°C", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = VxTheme.primaryBlue)
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                             Row(
@@ -570,7 +597,7 @@ fun PredictionScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(text = "कमरे की नमी (Humidity):", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text(text = "${currentChamberData.humidity.toInt()}%", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = VxEmeraldDark)
+                                Text(text = "${currentChamberData.humidity.toInt()}%", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = VxTheme.emeraldDark)
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                             Row(
@@ -578,7 +605,7 @@ fun PredictionScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(text = "आदर्श तापमान (Ideal Temp):", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text(text = "${selectedProduce.optimalTemp}°C (±${selectedProduce.tempTolerance}°C)", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = VxTextPrimary)
+                                Text(text = "${selectedProduce.optimalTemp}°C (±${selectedProduce.tempTolerance}°C)", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                             }
                         }
                     }
@@ -592,7 +619,7 @@ fun PredictionScreen(
                             onRunPrediction(selectedProduce.nameEnglish, harvestDate, chamberKey)
                         },
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = VxPrimaryBlue),
+                        colors = ButtonDefaults.buttonColors(containerColor = VxTheme.primaryBlue),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp)
@@ -601,7 +628,8 @@ fun PredictionScreen(
                         Icon(
                             imageVector = Icons.Default.AutoAwesome,
                             contentDescription = null,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(18.dp),
+                            tint = Color.White
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
@@ -642,7 +670,7 @@ fun PredictionScreen(
                     .testTag("prediction_result_card"),
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                border = BorderStroke(1.dp, VxBorderGreen),
+                border = BorderStroke(1.dp, VxTheme.borderGreen),
                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
@@ -667,7 +695,7 @@ fun PredictionScreen(
                                     text = "${prediction.estimatedDays} दिन (Days)",
                                     fontSize = 24.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = VxEmeraldDark
+                                    color = VxTheme.emeraldDark
                                 )
                             }
                         }
@@ -676,15 +704,15 @@ fun PredictionScreen(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(VxSurfaceGreen)
-                                .border(1.dp, VxBorderGreen, RoundedCornerShape(12.dp))
+                                .background(VxTheme.surfaceGreen)
+                                .border(1.dp, VxTheme.borderGreen, RoundedCornerShape(12.dp))
                                 .padding(horizontal = 10.dp, vertical = 4.dp)
                         ) {
                             Text(
                                 text = "${prediction.confidencePercent}% सटीक",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = VxEmeraldDark
+                                color = VxTheme.emeraldDark
                             )
                         }
                     }
@@ -694,8 +722,8 @@ fun PredictionScreen(
                     // Market Price Highlight in Prediction Card
                     Surface(
                         shape = RoundedCornerShape(10.dp),
-                        color = VxSurfaceBlue,
-                        border = BorderStroke(1.dp, VxBorderBlue),
+                        color = VxTheme.surfaceBlue,
+                        border = BorderStroke(1.dp, VxTheme.borderBlue),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Row(
@@ -707,30 +735,30 @@ fun PredictionScreen(
                                 Text(
                                     text = "वर्तमान मंडी भाव (Current Mandi Rate)",
                                     fontSize = 11.sp,
-                                    color = VxTextSecondary
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
                                     text = "₹${prediction.currentMarketPrice} / ${prediction.priceUnit}",
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = VxPrimaryBlue
+                                    color = VxTheme.primaryBlue
                                 )
                                 Text(
                                     text = "मंडी: ${prediction.majorState}",
                                     fontSize = 11.sp,
-                                    color = VxTextSecondary
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             Surface(
                                 shape = RoundedCornerShape(8.dp),
-                                color = VxSurfaceGreen,
-                                border = BorderStroke(1.dp, VxBorderGreen)
+                                color = VxTheme.surfaceGreen,
+                                border = BorderStroke(1.dp, VxTheme.borderGreen)
                             ) {
                                 Text(
                                     text = "+${prediction.priceTrendPercent}% भाव में बढ़त 📈",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = VxEmeraldDark,
+                                    color = VxTheme.emeraldDark,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                 )
                             }
@@ -747,19 +775,19 @@ fun PredictionScreen(
                         ConditionPill(
                             icon = Icons.Default.Thermostat,
                             label = "${prediction.currentTemp}°C Temp",
-                            color = VxPrimaryBlue,
+                            color = VxTheme.primaryBlue,
                             modifier = Modifier.weight(1f)
                         )
                         ConditionPill(
                             icon = Icons.Default.WaterDrop,
                             label = "${prediction.currentHumidity.toInt()}% Humidity",
-                            color = VxEmeraldDark,
+                            color = VxTheme.emeraldDark,
                             modifier = Modifier.weight(1f)
                         )
                         ConditionPill(
                             icon = Icons.Default.Eco,
                             label = "Range OK",
-                            color = VxPurple,
+                            color = VxTheme.purple,
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -768,8 +796,9 @@ fun PredictionScreen(
 
                     // Recommendation & Action
                     Surface(
-                        color = VxSurfaceSubtle,
+                        color = VxTheme.surfaceSubtle,
                         shape = RoundedCornerShape(10.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
@@ -777,7 +806,7 @@ fun PredictionScreen(
                                 Icon(
                                     imageVector = Icons.Default.Info,
                                     contentDescription = null,
-                                    tint = VxPrimaryBlue,
+                                    tint = VxTheme.primaryBlue,
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
@@ -799,7 +828,187 @@ fun PredictionScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ==========================================
+            // 1. GEMINI 3.8 FLASH AI ADVISORY CARD
+            // ==========================================
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("gemini_ai_advisory_card"),
+                shape = RoundedCornerShape(14.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                border = BorderStroke(1.dp, VxTheme.purple.copy(alpha = 0.5f)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Column(modifier = Modifier.padding(18.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(VxTheme.purple.copy(alpha = 0.15f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.AutoAwesome,
+                                    contentDescription = "Gemini AI",
+                                    tint = VxTheme.purple,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Text(
+                                    text = "Gemini 3.8 Flash AI Advisory",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = "Real-time Agronomic & Market Intelligence",
+                                    fontSize = 11.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+
+                        if (isAiPredicting) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                strokeWidth = 2.dp,
+                                color = VxTheme.purple
+                            )
+                        } else {
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = VxTheme.purple.copy(alpha = 0.12f),
+                                border = BorderStroke(1.dp, VxTheme.purple.copy(alpha = 0.3f))
+                            ) {
+                                Text(
+                                    text = geminiPrediction?.spoilageRiskLevel?.let { "$it Risk" } ?: "Low Risk",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = VxTheme.purple,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    val advisoryText = geminiPrediction?.aiAnalysis
+                        ?: "फसल की जैविक श्वसन दर स्थिर है। वर्तमान तापमान और आर्द्रता स्तर के तहत यह उपज अगले 5-7 दिनों तक उच्च गुणवत्ता बनाए रखेगी।"
+
+                    Text(
+                        text = advisoryText,
+                        fontSize = 12.sp,
+                        lineHeight = 18.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Selling Window & Price Trajectory Box
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = VxTheme.surfaceSubtle,
+                        border = BorderStroke(1.dp, VxTheme.border),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.CalendarMonth,
+                                    contentDescription = null,
+                                    tint = VxTheme.primaryBlue,
+                                    modifier = Modifier.size(15.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "सर्वोत्तम बिक्री समय (Best Selling Window):",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text(
+                                text = geminiPrediction?.recommendedSellingWindow ?: "अगले 4 से 6 दिनों के भीतर मंडी में बिक्री करें।",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = VxTheme.primaryBlue
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.TrendingUp,
+                                    contentDescription = null,
+                                    tint = VxTheme.emerald,
+                                    modifier = Modifier.size(15.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "मंडी भाव रुझान (Mandi Price Forecast):",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text(
+                                text = geminiPrediction?.expectedPriceTrend ?: "निकटवर्ती थोक मंडी में मांग स्थिर व भाव में 5-8% वृद्धि संभावित है।",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+
+                            if (!geminiPrediction?.storageAdjustmentAdvice.isNullOrBlank()) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "💡 सुझाव: ${geminiPrediction?.storageAdjustmentAdvice}",
+                                    fontSize = 11.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ==========================================
+            // 2. GOOGLE MAPS & APMC MANDI ROUTE CARD
+            // ==========================================
+            val targetMandi = MandiCatalog.allMandis.find {
+                it.name.contains(currentLocationInfo?.nearestMandi ?: "", ignoreCase = true) ||
+                it.city.contains(currentLocationInfo?.cityName ?: "", ignoreCase = true)
+            } ?: MandiCatalog.findNearestMandi(
+                currentLocationInfo?.latitude ?: 28.6139,
+                currentLocationInfo?.longitude ?: 77.2090
+            )
+
+            GoogleMandiMapView(
+                mandi = targetMandi,
+                storageLat = currentLocationInfo?.latitude ?: 28.6139,
+                storageLng = currentLocationInfo?.longitude ?: 77.2090,
+                storageName = "GREENCOLD Storage Unit",
+                produceName = selectedProduce.nameEnglish,
+                cropPrice = prediction.currentMarketPrice.toDouble(),
+                priceUnit = selectedProduce.unit
+            )
+
+            Spacer(modifier = Modifier.height(28.dp))
         }
     }
 }

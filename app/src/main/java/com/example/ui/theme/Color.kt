@@ -51,6 +51,10 @@ val VxWarningAmber = Color(0xFFD97706)
 val VxWarningDark = Color(0xFFB45309)
 
 object VxTheme {
+    val surfaceCard: Color
+        @Composable get() = if (isSystemInDarkTheme()) Color(0xFF1E293B) else Color(0xFFFFFFFF)
+    val surfaceLight: Color
+        @Composable get() = if (isSystemInDarkTheme()) Color(0xFF1E293B) else Color(0xFFFFFFFF)
     val surfaceSubtle: Color
         @Composable get() = if (isSystemInDarkTheme()) Color(0xFF1E293B) else Color(0xFFF1F5F9)
     val surfaceBlue: Color
@@ -116,6 +120,8 @@ object VxTheme {
 
     val emerald: Color
         @Composable get() = if (isSystemInDarkTheme()) Color(0xFF34D399) else Color(0xFF16A34A)
+    val emeraldAccent: Color
+        @Composable get() = if (isSystemInDarkTheme()) Color(0xFF34D399) else Color(0xFF10B981)
     val emeraldDark: Color
         @Composable get() = if (isSystemInDarkTheme()) Color(0xFF6EE7B7) else Color(0xFF15803D)
     val warningAmber: Color

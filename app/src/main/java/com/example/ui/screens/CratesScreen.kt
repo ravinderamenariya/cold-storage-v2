@@ -48,6 +48,7 @@ import com.example.ui.components.VisionXHeader
 import com.example.ui.theme.VxEmerald
 import com.example.ui.theme.VxPrimaryBlue
 import com.example.ui.theme.VxSurfaceSubtle
+import com.example.ui.theme.VxTheme
 import com.example.ui.theme.VxWarningAmber
 
 @Composable
@@ -95,7 +96,7 @@ fun CratesScreen(
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = "Add Crate",
-                            tint = VxPrimaryBlue,
+                            tint = VxTheme.primaryBlue,
                             modifier = Modifier.size(26.dp)
                         )
                     }
@@ -105,7 +106,7 @@ fun CratesScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onAddCrateClick,
-                containerColor = VxPrimaryBlue,
+                containerColor = VxTheme.primaryBlue,
                 contentColor = Color.White,
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.testTag("fab_add_crate")
@@ -154,8 +155,10 @@ fun CratesScreen(
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = VxPrimaryBlue,
+                    focusedBorderColor = VxTheme.primaryBlue,
                     unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                     focusedContainerColor = MaterialTheme.colorScheme.surface,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface
                 ),
@@ -176,10 +179,10 @@ fun CratesScreen(
                     Surface(
                         onClick = { selectedFilter = filter },
                         shape = RoundedCornerShape(20.dp),
-                        color = if (isSelected) VxPrimaryBlue else MaterialTheme.colorScheme.surface,
+                        color = if (isSelected) VxTheme.primaryBlue else MaterialTheme.colorScheme.surface,
                         border = androidx.compose.foundation.BorderStroke(
                             1.dp,
-                            if (isSelected) VxPrimaryBlue else MaterialTheme.colorScheme.outline
+                            if (isSelected) VxTheme.primaryBlue else MaterialTheme.colorScheme.outline
                         ),
                         modifier = Modifier.testTag("filter_chip_$filter")
                     ) {

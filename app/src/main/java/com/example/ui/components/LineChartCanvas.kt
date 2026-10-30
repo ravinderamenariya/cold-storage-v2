@@ -47,6 +47,7 @@ import com.example.ui.theme.VxPurple
 import com.example.ui.theme.VxSurfaceSubtle
 import com.example.ui.theme.VxTextMuted
 import com.example.ui.theme.VxTextSecondary
+import com.example.ui.theme.VxTheme
 
 data class ChartPoint(
     val label: String,
@@ -131,7 +132,7 @@ fun TemperatureOverviewChart(
                 Row(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
-                        .background(VxSurfaceSubtle)
+                        .background(VxTheme.surfaceSubtle)
                         .padding(2.dp)
                 ) {
                     listOf("24H", "7D", "30D").forEach { interval ->
@@ -139,7 +140,7 @@ fun TemperatureOverviewChart(
                         Surface(
                             onClick = { onIntervalSelected(interval) },
                             shape = RoundedCornerShape(6.dp),
-                            color = if (isSelected) VxPrimaryBlue else Color.Transparent,
+                            color = if (isSelected) VxTheme.primaryBlue else Color.Transparent,
                             modifier = Modifier.testTag("chart_interval_$interval")
                         ) {
                             Text(
@@ -163,15 +164,15 @@ fun TemperatureOverviewChart(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (showChamber1) {
-                    LegendItem(color = VxPrimaryBlue, label = "Chamber 1")
+                    LegendItem(color = VxTheme.primaryBlue, label = "Chamber 1")
                     Spacer(modifier = Modifier.width(16.dp))
                 }
                 if (showChamber2) {
-                    LegendItem(color = VxEmerald, label = "Chamber 2")
+                    LegendItem(color = VxTheme.emeraldDark, label = "Chamber 2")
                     Spacer(modifier = Modifier.width(16.dp))
                 }
                 if (showOutside) {
-                    LegendItem(color = VxPurple, label = "Outside")
+                    LegendItem(color = VxTheme.purple, label = "Outside")
                 }
             }
 
@@ -181,8 +182,9 @@ fun TemperatureOverviewChart(
             if (selectedIndex != null && selectedIndex in points.indices) {
                 val pt = points[selectedIndex!!]
                 Surface(
-                    color = VxSurfaceSubtle,
+                    color = VxTheme.surfaceSubtle,
                     shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -204,7 +206,7 @@ fun TemperatureOverviewChart(
                                     text = "C1: ${pt.chamber1}°C  ",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = VxPrimaryBlue
+                                    color = VxTheme.primaryBlue
                                 )
                             }
                             if (showChamber2) {
@@ -212,7 +214,7 @@ fun TemperatureOverviewChart(
                                     text = "C2: ${pt.chamber2}°C  ",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = VxEmerald
+                                    color = VxTheme.emeraldDark
                                 )
                             }
                             if (showOutside) {
@@ -220,7 +222,7 @@ fun TemperatureOverviewChart(
                                     text = "Out: ${pt.outside}°C",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = VxPurple
+                                    color = VxTheme.purple
                                 )
                             }
                         }

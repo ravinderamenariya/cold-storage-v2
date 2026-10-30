@@ -43,18 +43,7 @@ import com.example.ui.components.PowerFlowDiagram
 import com.example.ui.components.RechartsTelemetryModule
 import com.example.ui.components.TemperatureOverviewChart
 import com.example.ui.components.VisionXHeader
-import com.example.ui.theme.VxBorder
-import com.example.ui.theme.VxBorderGreen
-import com.example.ui.theme.VxBorderWarning
-import com.example.ui.theme.VxEmerald
-import com.example.ui.theme.VxEmeraldDark
-import com.example.ui.theme.VxNavy
-import com.example.ui.theme.VxPrimaryBlue
-import com.example.ui.theme.VxSurfaceGreen
-import com.example.ui.theme.VxSurfaceSubtle
-import com.example.ui.theme.VxSurfaceWarning
-import com.example.ui.theme.VxWarningAmber
-import com.example.ui.theme.VxWarningDark
+import com.example.ui.theme.VxTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -111,7 +100,7 @@ fun SolarPowerScreen(
                             .testTag("solar_input_card"),
                         shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        border = BorderStroke(1.dp, VxBorderWarning),
+                        border = BorderStroke(1.dp, VxTheme.borderWarning),
                         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                     ) {
                         Column(modifier = Modifier.padding(14.dp)) {
@@ -129,14 +118,14 @@ fun SolarPowerScreen(
                                 Box(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(4.dp))
-                                        .background(VxSurfaceGreen)
+                                        .background(VxTheme.surfaceGreen)
                                         .padding(horizontal = 6.dp, vertical = 2.dp)
                                 ) {
                                     Text(
                                         text = "Active",
                                         fontSize = 10.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = VxEmeraldDark
+                                        color = VxTheme.emeraldDark
                                     )
                                 }
                             }
@@ -152,7 +141,7 @@ fun SolarPowerScreen(
                                     text = " W",
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = VxWarningDark,
+                                    color = VxTheme.warningDark,
                                     modifier = Modifier.padding(bottom = 2.dp)
                                 )
                             }
@@ -172,7 +161,7 @@ fun SolarPowerScreen(
                             .testTag("battery_grid_card"),
                         shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        border = BorderStroke(1.dp, VxBorderGreen),
+                        border = BorderStroke(1.dp, VxTheme.borderGreen),
                         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                     ) {
                         Column(modifier = Modifier.padding(14.dp)) {
@@ -190,14 +179,14 @@ fun SolarPowerScreen(
                                 Box(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(4.dp))
-                                        .background(VxSurfaceGreen)
+                                        .background(VxTheme.surfaceGreen)
                                         .padding(horizontal = 6.dp, vertical = 2.dp)
                                 ) {
                                     Text(
                                         text = "Healthy",
                                         fontSize = 10.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = VxEmeraldDark
+                                        color = VxTheme.emeraldDark
                                     )
                                 }
                             }
@@ -213,7 +202,7 @@ fun SolarPowerScreen(
                                     text = "%",
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = VxEmeraldDark,
+                                    color = VxTheme.emeraldDark,
                                     modifier = Modifier.padding(bottom = 2.dp)
                                 )
                             }
@@ -263,21 +252,21 @@ fun SolarPowerScreen(
                                         label = "Voltage",
                                         value = "${powerData.batteryVoltage} V",
                                         subtitle = "Nominal: 12.0 V",
-                                        color = VxPrimaryBlue,
+                                        color = VxTheme.primaryBlue,
                                         modifier = Modifier.weight(1f)
                                     )
                                     ElectricParamBox(
                                         label = "Current",
                                         value = "${powerData.batteryCurrent} A",
                                         subtitle = "Charging Input",
-                                        color = VxEmeraldDark,
+                                        color = VxTheme.emeraldDark,
                                         modifier = Modifier.weight(1f)
                                     )
                                     ElectricParamBox(
                                         label = "Temperature",
                                         value = "${powerData.batteryTemperature.toInt()}°C",
                                         subtitle = "Safe Band < 45°C",
-                                        color = VxWarningDark,
+                                        color = VxTheme.warningDark,
                                         modifier = Modifier.weight(1f)
                                     )
                                 }
@@ -288,7 +277,7 @@ fun SolarPowerScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clip(RoundedCornerShape(8.dp))
-                                        .background(VxSurfaceSubtle)
+                                        .background(VxTheme.surfaceSubtle)
                                         .padding(10.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
@@ -336,21 +325,21 @@ fun SolarPowerScreen(
                                         label = "Voltage",
                                         value = "${powerData.batteryVoltage} V",
                                         subtitle = "Nominal: 12.0 V",
-                                        color = VxPrimaryBlue,
+                                        color = VxTheme.primaryBlue,
                                         modifier = Modifier.weight(1f)
                                     )
                                     ElectricParamBox(
                                         label = "Current",
                                         value = "${powerData.batteryCurrent} A",
                                         subtitle = "Charging Input",
-                                        color = VxEmeraldDark,
+                                        color = VxTheme.emeraldDark,
                                         modifier = Modifier.weight(1f)
                                     )
                                     ElectricParamBox(
                                         label = "Temperature",
                                         value = "${powerData.batteryTemperature.toInt()}°C",
                                         subtitle = "Safe Band < 45°C",
-                                        color = VxWarningDark,
+                                        color = VxTheme.warningDark,
                                         modifier = Modifier.weight(1f)
                                     )
                                 }
@@ -361,7 +350,7 @@ fun SolarPowerScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clip(RoundedCornerShape(8.dp))
-                                        .background(VxSurfaceSubtle)
+                                        .background(VxTheme.surfaceSubtle)
                                         .padding(10.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
@@ -414,7 +403,7 @@ private fun ElectricParamBox(
         modifier = modifier
             .padding(horizontal = 4.dp)
             .clip(RoundedCornerShape(10.dp))
-            .background(VxSurfaceSubtle)
+            .background(VxTheme.surfaceSubtle)
             .padding(10.dp)
     ) {
         Column {

@@ -71,6 +71,7 @@ import com.example.ui.theme.VxSteelBlue
 import com.example.ui.theme.VxSurfaceBlue
 import com.example.ui.theme.VxSurfaceGreen
 import com.example.ui.theme.VxSurfaceSubtle
+import com.example.ui.theme.VxTheme
 import com.example.ui.theme.VxWarningAmber
 import kotlin.math.max
 import kotlin.math.min
@@ -153,13 +154,13 @@ fun RechartsTelemetryModule(
                         modifier = Modifier
                             .size(36.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .background(VxSurfaceBlue),
+                            .background(VxTheme.surfaceBlue),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.ShowChart,
                             contentDescription = null,
-                            tint = VxPrimaryBlue,
+                            tint = VxTheme.primaryBlue,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -181,15 +182,15 @@ fun RechartsTelemetryModule(
 
                 // 24H Badge
                 Surface(
-                    color = VxSurfaceBlue,
+                    color = VxTheme.surfaceBlue,
                     shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, VxBorderBlue)
+                    border = BorderStroke(1.dp, VxTheme.borderBlue)
                 ) {
                     Text(
                         text = "Last 24 Hours",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
-                        color = VxPrimaryBlue,
+                        color = VxTheme.primaryBlue,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
@@ -202,7 +203,7 @@ fun RechartsTelemetryModule(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(10.dp))
-                    .background(VxSurfaceSubtle)
+                    .background(VxTheme.surfaceSubtle)
                     .padding(3.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -212,7 +213,7 @@ fun RechartsTelemetryModule(
                     Surface(
                         onClick = { selectedMetricMode = index },
                         shape = RoundedCornerShape(8.dp),
-                        color = if (isSelected) VxPrimaryBlue else Color.Transparent,
+                        color = if (isSelected) VxTheme.primaryBlue else Color.Transparent,
                         modifier = Modifier
                             .weight(1f)
                             .testTag("recharts_tab_$index")
@@ -292,7 +293,7 @@ fun RechartsTelemetryModule(
 
             // Recharts-style Tooltip Card (Synchronized with Crosshair)
             Surface(
-                color = VxSurfaceSubtle,
+                color = VxTheme.surfaceSubtle,
                 shape = RoundedCornerShape(10.dp),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                 modifier = Modifier.fillMaxWidth()
@@ -588,7 +589,7 @@ fun RechartsTelemetryModule(
 
             // Trend Identification Card
             Surface(
-                color = VxSurfaceSubtle,
+                color = VxTheme.surfaceSubtle,
                 shape = RoundedCornerShape(12.dp),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                 modifier = Modifier.fillMaxWidth()
@@ -712,7 +713,7 @@ private fun LegendToggleChip(
     Surface(
         onClick = onToggle,
         shape = RoundedCornerShape(8.dp),
-        color = if (isSelected) VxSurfaceSubtle else MaterialTheme.colorScheme.surface,
+        color = if (isSelected) VxTheme.surfaceSubtle else MaterialTheme.colorScheme.surface,
         border = BorderStroke(1.dp, if (isSelected) color.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outline),
         modifier = modifier
     ) {

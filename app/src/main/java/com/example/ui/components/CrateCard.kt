@@ -30,13 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.Crate
-import com.example.ui.theme.VxBorder
-import com.example.ui.theme.VxDangerRed
-import com.example.ui.theme.VxEmerald
-import com.example.ui.theme.VxPrimaryBlue
-import com.example.ui.theme.VxSurfaceSubtle
-import com.example.ui.theme.VxTextSecondary
-import com.example.ui.theme.VxWarningAmber
+import com.example.ui.theme.VxTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -75,9 +69,9 @@ fun CrateCard(
     val matchedProduce = marketProduce ?: com.example.data.model.IndianAgriMarketCatalog.findByName(crate.product)
 
     val progressColor = when {
-        crate.freshnessPercent >= 70 -> VxEmerald
-        crate.freshnessPercent >= 40 -> VxWarningAmber
-        else -> VxDangerRed
+        crate.freshnessPercent >= 70 -> VxTheme.emerald
+        crate.freshnessPercent >= 40 -> VxTheme.warningAmber
+        else -> VxTheme.errorRed
     }
 
     Card(
@@ -107,7 +101,7 @@ fun CrateCard(
                         modifier = Modifier
                             .size(42.dp)
                             .clip(RoundedCornerShape(10.dp))
-                            .background(VxSurfaceSubtle),
+                            .background(VxTheme.surfaceSubtle),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -124,7 +118,7 @@ fun CrateCard(
                                 text = crate.id,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = VxPrimaryBlue
+                                color = VxTheme.primaryBlue
                             )
                             Text(
                                 text = " – ${crate.product}",
@@ -154,7 +148,7 @@ fun CrateCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(6.dp))
-                        .background(VxSurfaceSubtle)
+                        .background(VxTheme.surfaceSubtle)
                         .padding(horizontal = 8.dp, vertical = 5.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
@@ -174,7 +168,7 @@ fun CrateCard(
                     }
                     val trend = matchedProduce.priceTrendPercent
                     val trendText = if (trend >= 0) "+$trend% ↗" else "$trend% ↘"
-                    val trendColor = if (trend >= 0) VxEmerald else VxDangerRed
+                    val trendColor = if (trend >= 0) VxTheme.emerald else VxTheme.errorRed
                     Text(
                         text = trendText,
                         fontSize = 11.sp,
@@ -213,7 +207,7 @@ fun CrateCard(
                     .height(6.dp)
                     .clip(RoundedCornerShape(3.dp)),
                 color = progressColor,
-                trackColor = VxSurfaceSubtle
+                trackColor = VxTheme.surfaceSubtle
             )
         }
     }

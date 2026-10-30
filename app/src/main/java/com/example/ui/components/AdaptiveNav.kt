@@ -52,16 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.ConnectionMode
 import com.example.ui.AppDestination
-import com.example.ui.theme.VxBorder
-import com.example.ui.theme.VxBorderSubtle
-import com.example.ui.theme.VxError
-import com.example.ui.theme.VxPrimaryAccent
-import com.example.ui.theme.VxSuccess
-import com.example.ui.theme.VxSurfaceBlue
-import com.example.ui.theme.VxSurfaceGreen
-import com.example.ui.theme.VxSurfaceSubtle
-import com.example.ui.theme.VxTextPrimary
-import com.example.ui.theme.VxTextSecondary
+import com.example.ui.theme.VxTheme
 
 /**
  * Navigation item definition for the adaptive sidebar.
@@ -105,7 +96,7 @@ fun VisionXAdaptiveSidebar(
             .width(if (isExpanded) 240.dp else 76.dp)
             .fillMaxHeight(),
         color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, VxBorder)
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Column(
             modifier = Modifier
@@ -130,14 +121,14 @@ fun VisionXAdaptiveSidebar(
                             modifier = Modifier
                                 .size(36.dp)
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(VxSurfaceBlue)
-                                .border(1.dp, VxBorder, RoundedCornerShape(10.dp)),
+                                .background(VxTheme.surfaceBlue)
+                                .border(1.dp, VxTheme.border, RoundedCornerShape(10.dp)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.AcUnit,
                                 contentDescription = "VISION X Logo",
-                                tint = VxPrimaryAccent,
+                                tint = VxTheme.primaryBlue,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -147,13 +138,13 @@ fun VisionXAdaptiveSidebar(
                                 text = "VISION X",
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = VxTextPrimary,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 letterSpacing = 0.5.sp
                             )
                             Text(
                                 text = "Cold Storage Control",
                                 fontSize = 11.sp,
-                                color = VxTextSecondary,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -164,22 +155,22 @@ fun VisionXAdaptiveSidebar(
                         modifier = Modifier
                             .size(40.dp)
                             .clip(RoundedCornerShape(10.dp))
-                            .background(VxSurfaceBlue)
-                            .border(1.dp, VxBorder, RoundedCornerShape(10.dp))
+                            .background(VxTheme.surfaceBlue)
+                            .border(1.dp, VxTheme.border, RoundedCornerShape(10.dp))
                             .clickable { onNavigate(AppDestination.HOME) },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.AcUnit,
                             contentDescription = "VISION X Logo",
-                            tint = VxPrimaryAccent,
+                            tint = VxTheme.primaryBlue,
                             modifier = Modifier.size(22.dp)
                         )
                     }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-                HorizontalDivider(color = VxBorder, thickness = 1.dp)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Navigation Items List
@@ -220,7 +211,7 @@ fun VisionXAdaptiveSidebar(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                HorizontalDivider(color = VxBorder, thickness = 1.dp)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
                 Spacer(modifier = Modifier.height(12.dp))
 
                 if (isExpanded) {
@@ -229,8 +220,8 @@ fun VisionXAdaptiveSidebar(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(8.dp))
-                            .background(if (isOnline) VxSurfaceGreen else VxSurfaceSubtle)
-                            .border(1.dp, VxBorder, RoundedCornerShape(8.dp))
+                            .background(if (isOnline) VxTheme.surfaceGreen else VxTheme.surfaceSubtle)
+                            .border(1.dp, VxTheme.border, RoundedCornerShape(8.dp))
                             .padding(horizontal = 10.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -240,21 +231,21 @@ fun VisionXAdaptiveSidebar(
                                 modifier = Modifier
                                     .size(7.dp)
                                     .clip(CircleShape)
-                                    .background(if (isOnline) VxSuccess else VxTextSecondary)
+                                    .background(if (isOnline) VxTheme.success else MaterialTheme.colorScheme.onSurfaceVariant)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = if (isOnline) "System Online" else "Offline Mode",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Medium,
-                                color = if (isOnline) VxSuccess else VxTextSecondary
+                                color = if (isOnline) VxTheme.success else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                         Text(
                             text = if (connectionMode == ConnectionMode.RASPBERRY_PI) "RPi 5" else "Demo",
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
-                            color = VxPrimaryAccent
+                            color = VxTheme.primaryBlue
                         )
                     }
 
@@ -273,13 +264,13 @@ fun VisionXAdaptiveSidebar(
                             modifier = Modifier
                                 .size(32.dp)
                                 .clip(CircleShape)
-                                .background(VxSurfaceSubtle),
+                                .background(VxTheme.surfaceSubtle),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Person,
                                 contentDescription = "Profile",
-                                tint = VxPrimaryAccent,
+                                tint = VxTheme.primaryBlue,
                                 modifier = Modifier.size(18.dp)
                             )
                         }
@@ -289,12 +280,12 @@ fun VisionXAdaptiveSidebar(
                                 text = "Admin Engineer",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = VxTextPrimary
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = "admin@coldchain.iot",
                                 fontSize = 10.sp,
-                                color = VxTextSecondary,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -306,14 +297,14 @@ fun VisionXAdaptiveSidebar(
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(VxSurfaceSubtle)
+                            .background(VxTheme.surfaceSubtle)
                             .clickable { onNavigate(AppDestination.SETTINGS) },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = "Profile",
-                            tint = VxPrimaryAccent,
+                            tint = VxTheme.primaryBlue,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -331,8 +322,8 @@ private fun SidebarNavItemRow(
     unreadCount: Int,
     onClick: () -> Unit
 ) {
-    val containerColor = if (isSelected) VxSurfaceBlue else Color.Transparent
-    val contentColor = if (isSelected) VxPrimaryAccent else VxTextSecondary
+    val containerColor = if (isSelected) VxTheme.surfaceBlue else Color.Transparent
+    val contentColor = if (isSelected) VxTheme.primaryBlue else MaterialTheme.colorScheme.onSurfaceVariant
     val fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
 
     Surface(
@@ -376,7 +367,7 @@ private fun SidebarNavItemRow(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
-                            .background(VxError)
+                            .background(VxTheme.errorRed)
                             .padding(horizontal = 6.dp, vertical = 2.dp)
                     ) {
                         Text(
@@ -399,7 +390,7 @@ private fun SidebarNavItemRow(
                     BadgedBox(
                         badge = {
                             Badge(
-                                containerColor = VxError,
+                                containerColor = VxTheme.errorRed,
                                 contentColor = Color.White
                             ) {
                                 Text(text = "$unreadCount", fontSize = 9.sp)

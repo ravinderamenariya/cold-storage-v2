@@ -28,6 +28,11 @@
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
         android:theme="@style/Theme.MyApplication">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${GOOGLE_MAPS_PLATFORM_KEY}" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

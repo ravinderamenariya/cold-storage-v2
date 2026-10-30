@@ -47,6 +47,7 @@ import com.example.ui.components.VisionXHeader
 import com.example.ui.theme.VxDangerRed
 import com.example.ui.theme.VxNavy
 import com.example.ui.theme.VxPrimaryBlue
+import com.example.ui.theme.VxTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -126,13 +127,13 @@ fun AddCrateScreen(
         ) {
             if (validationError != null) {
                 Surface(
-                    color = Color(0xFFFEE2E2),
+                    color = MaterialTheme.colorScheme.errorContainer,
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
                         text = validationError!!,
-                        color = VxDangerRed,
+                        color = MaterialTheme.colorScheme.error,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(12.dp)
@@ -141,6 +142,17 @@ fun AddCrateScreen(
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
+            val textFieldColors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = VxTheme.primaryBlue,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                focusedLabelColor = VxTheme.primaryBlue,
+                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface
+            )
+
             // Crate ID
             OutlinedTextField(
                 value = crateId,
@@ -148,10 +160,7 @@ fun AddCrateScreen(
                 label = { Text("Crate ID *") },
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = VxPrimaryBlue,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                ),
+                colors = textFieldColors,
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("add_crate_id_input")
@@ -171,10 +180,7 @@ fun AddCrateScreen(
                     label = { Text("Product / Produce *") },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isProductDropdownOpen) },
                     shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = VxPrimaryBlue,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                    ),
+                    colors = textFieldColors,
                     modifier = Modifier
                         .fillMaxWidth()
                         .menuAnchor()
@@ -187,7 +193,7 @@ fun AddCrateScreen(
                 ) {
                     productsList.forEach { prod ->
                         DropdownMenuItem(
-                            text = { Text(prod) },
+                            text = { Text(prod, color = MaterialTheme.colorScheme.onSurface) },
                             onClick = {
                                 onProductChanged(prod)
                                 isProductDropdownOpen = false
@@ -211,10 +217,7 @@ fun AddCrateScreen(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = VxPrimaryBlue,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                    ),
+                    colors = textFieldColors,
                     modifier = Modifier
                         .weight(1f)
                         .testTag("add_crate_quantity_input")
@@ -226,10 +229,7 @@ fun AddCrateScreen(
                     label = { Text("Unit") },
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = VxPrimaryBlue,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                    ),
+                    colors = textFieldColors,
                     modifier = Modifier
                         .weight(1f)
                         .testTag("add_crate_unit_input")
@@ -258,10 +258,10 @@ fun AddCrateScreen(
                             targetTempStr = if (chamber == "Chamber 1") "12.0" else "4.0"
                         },
                         shape = RoundedCornerShape(12.dp),
-                        color = if (isSelected) VxPrimaryBlue else MaterialTheme.colorScheme.surface,
+                        color = if (isSelected) VxTheme.primaryBlue else MaterialTheme.colorScheme.surface,
                         border = androidx.compose.foundation.BorderStroke(
                             1.dp,
-                            if (isSelected) VxPrimaryBlue else MaterialTheme.colorScheme.outline
+                            if (isSelected) VxTheme.primaryBlue else MaterialTheme.colorScheme.outline
                         ),
                         modifier = Modifier
                             .weight(1f)
@@ -301,10 +301,7 @@ fun AddCrateScreen(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = VxPrimaryBlue,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                    ),
+                    colors = textFieldColors,
                     modifier = Modifier.weight(1f)
                 )
 
@@ -315,10 +312,7 @@ fun AddCrateScreen(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = VxPrimaryBlue,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                    ),
+                    colors = textFieldColors,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -333,10 +327,7 @@ fun AddCrateScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = VxPrimaryBlue,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                ),
+                colors = textFieldColors,
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("add_crate_shelf_life_input")
@@ -351,10 +342,7 @@ fun AddCrateScreen(
                 label = { Text("Batch / Storage Notes (Optional)") },
                 maxLines = 3,
                 shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = VxPrimaryBlue,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                ),
+                colors = textFieldColors,
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("add_crate_notes_input")
@@ -397,13 +385,13 @@ fun AddCrateScreen(
                     onSaveCrate(newCrate)
                 },
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = VxNavy),
+                colors = ButtonDefaults.buttonColors(containerColor = VxTheme.primaryBlue),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
                     .testTag("submit_add_crate_button")
             ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = null)
+                Icon(imageVector = Icons.Default.Add, contentDescription = null, tint = Color.White)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Add Crate",

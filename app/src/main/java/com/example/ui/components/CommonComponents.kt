@@ -146,8 +146,8 @@ fun VisionXHeader(
                         modifier = Modifier
                             .size(34.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .background(VxSurfaceBlue)
-                            .border(1.dp, VxBorder, RoundedCornerShape(8.dp))
+                            .background(VxTheme.surfaceBlue)
+                            .border(1.dp, VxTheme.border, RoundedCornerShape(8.dp))
                             .testTag("greencold_logo_badge"),
                         contentAlignment = Alignment.Center
                     ) {
@@ -157,7 +157,7 @@ fun VisionXHeader(
                                 fontWeight = FontWeight.Black,
                                 letterSpacing = (-0.5).sp
                             ),
-                            color = VxPrimaryBlue
+                            color = VxTheme.primaryBlue
                         )
                     }
                     Spacer(modifier = Modifier.width(8.dp))
@@ -204,14 +204,14 @@ fun VisionXHeader(
                             modifier = Modifier
                                 .size(34.dp)
                                 .clip(CircleShape)
-                                .background(VxSurfaceGreen)
-                                .border(1.dp, VxBorderGreen, CircleShape)
+                                .background(VxTheme.surfaceGreen)
+                                .border(1.dp, VxTheme.borderGreen, CircleShape)
                                 .testTag("header_speaker_button")
                         ) {
                             Icon(
                                 imageVector = Icons.Default.VolumeUp,
                                 contentDescription = "Listen status",
-                                tint = VxSuccess,
+                                tint = VxTheme.success,
                                 modifier = Modifier.size(17.dp)
                             )
                         }
@@ -222,8 +222,8 @@ fun VisionXHeader(
                         Surface(
                             onClick = onLanguageClick,
                             shape = RoundedCornerShape(12.dp),
-                            color = VxSurfaceBlue,
-                            border = BorderStroke(1.dp, VxBorder),
+                            color = VxTheme.surfaceBlue,
+                            border = BorderStroke(1.dp, VxTheme.border),
                             modifier = Modifier.testTag("header_lang_button")
                         ) {
                             Row(
@@ -236,7 +236,7 @@ fun VisionXHeader(
                                     text = language.nativeName,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = VxPrimaryAccent,
+                                    color = VxTheme.primaryBlue,
                                     maxLines = 1
                                 )
                             }
@@ -249,13 +249,13 @@ fun VisionXHeader(
                         modifier = Modifier
                             .size(34.dp)
                             .clip(CircleShape)
-                            .background(VxSurfaceSubtle)
+                            .background(VxTheme.surfaceSubtle)
                             .testTag("header_profile_button")
                     ) {
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = "Profile",
-                            tint = VxPrimaryBlue,
+                            tint = VxTheme.primaryBlue,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -287,10 +287,10 @@ fun OnlineBadge(
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
-            .background(if (isOnline) VxSurfaceGreen else VxSurfaceSubtle)
+            .background(if (isOnline) VxTheme.surfaceGreen else VxTheme.surfaceSubtle)
             .border(
                 1.dp,
-                if (isOnline) VxBorderGreen else VxBorderSubtle,
+                if (isOnline) VxTheme.borderGreen else VxTheme.borderSubtle,
                 RoundedCornerShape(12.dp)
             )
             .padding(horizontal = 8.dp, vertical = 2.dp),
@@ -302,7 +302,7 @@ fun OnlineBadge(
                     .size(6.dp)
                     .clip(CircleShape)
                     .background(
-                        if (isOnline) VxEmerald.copy(alpha = alpha) else VxTextMuted
+                        if (isOnline) VxTheme.emerald.copy(alpha = alpha) else VxTheme.textMuted
                     )
             )
             Spacer(modifier = Modifier.width(4.dp))
@@ -310,7 +310,7 @@ fun OnlineBadge(
                 text = if (isOnline) "Online" else "Offline",
                 fontSize = 10.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = if (isOnline) VxEmeraldDark else VxTextSecondary
+                color = if (isOnline) VxTheme.emerald else VxTheme.textSecondary
             )
         }
     }
@@ -327,21 +327,21 @@ fun ConnectionModeBanner(
 ) {
     val (bgColor, borderColor, textColor, label) = when (mode) {
         ConnectionMode.DEMO -> BannerVisuals(
-            VxSurfaceWarning,
-            VxBorderWarning,
-            VxWarningDark,
+            VxTheme.surfaceWarning,
+            VxTheme.borderWarning,
+            VxTheme.warningAmber,
             "DEMO MODE • Real-time Simulation Active"
         )
         ConnectionMode.RASPBERRY_PI -> BannerVisuals(
-            VxSurfaceGreen,
-            VxBorderGreen,
-            VxEmeraldDark,
+            VxTheme.surfaceGreen,
+            VxTheme.borderGreen,
+            VxTheme.emerald,
             "CONNECTED • Raspberry Pi 5 Live Telemetry"
         )
         ConnectionMode.CLOUD_SYNC -> BannerVisuals(
-            VxSurfaceBlue,
-            VxBorderBlue,
-            VxPrimaryBlue,
+            VxTheme.surfaceBlue,
+            VxTheme.borderBlue,
+            VxTheme.primaryBlue,
             "CLOUD SYNC • Realtime Storage Synchronization"
         )
     }
@@ -485,7 +485,7 @@ fun EmptyStateCard(
                 Surface(
                     onClick = onAction,
                     shape = RoundedCornerShape(10.dp),
-                    color = VxPrimaryBlue,
+                    color = VxTheme.primaryBlue,
                     modifier = Modifier.testTag("empty_state_action_button")
                 ) {
                     Text(

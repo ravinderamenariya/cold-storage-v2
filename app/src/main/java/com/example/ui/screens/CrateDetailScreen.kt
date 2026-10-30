@@ -67,6 +67,7 @@ import com.example.ui.theme.VxSurfaceDanger
 import com.example.ui.theme.VxSurfaceGreen
 import com.example.ui.theme.VxSurfaceSubtle
 import com.example.ui.theme.VxSurfaceWarning
+import com.example.ui.theme.VxTheme
 import com.example.ui.theme.VxWarningAmber
 import com.example.ui.theme.VxWarningDark
 import java.text.SimpleDateFormat
@@ -112,9 +113,9 @@ fun CrateDetailScreen(
     val durationStr = if (diffHours < 24) "$diffHours Hours" else "${diffHours / 24} Days ${diffHours % 24} Hours"
 
     val progressColor = when {
-        crate.freshnessPercent >= 70 -> VxEmerald
-        crate.freshnessPercent >= 40 -> VxWarningAmber
-        else -> VxDangerRed
+        crate.freshnessPercent >= 70 -> VxTheme.emeraldDark
+        crate.freshnessPercent >= 40 -> VxTheme.warningDark
+        else -> VxTheme.errorRed
     }
 
     Scaffold(
@@ -172,7 +173,7 @@ fun CrateDetailScreen(
                                         text = crate.id,
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = VxPrimaryBlue
+                                        color = VxTheme.primaryBlue
                                     )
                                 }
                             }
@@ -206,7 +207,7 @@ fun CrateDetailScreen(
                                 modifier = Modifier.size(86.dp),
                                 strokeWidth = 8.dp,
                                 color = progressColor,
-                                trackColor = VxSurfaceSubtle
+                                trackColor = VxTheme.surfaceSubtle
                             )
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
@@ -258,7 +259,7 @@ fun CrateDetailScreen(
                                 label = "Temperature",
                                 value = "${currentChamberData.currentTemp}°C",
                                 target = "Target: ${crate.targetTemp.toInt()}°C",
-                                color = VxPrimaryBlue,
+                                color = VxTheme.primaryBlue,
                                 modifier = Modifier.weight(1f)
                             )
 
@@ -268,7 +269,7 @@ fun CrateDetailScreen(
                                 label = "Humidity",
                                 value = "${currentChamberData.humidity.toInt()}%",
                                 target = "Target: ${crate.targetHumidity.toInt()}%",
-                                color = VxEmerald,
+                                color = VxTheme.emeraldDark,
                                 modifier = Modifier.weight(1f)
                             )
 
@@ -278,7 +279,7 @@ fun CrateDetailScreen(
                                 label = "Gas / Air",
                                 value = "Normal",
                                 target = "MQ-2 OK",
-                                color = Color(0xFF8B5CF6),
+                                color = VxTheme.purple,
                                 modifier = Modifier.weight(1f)
                             )
                         }
@@ -355,9 +356,9 @@ fun CrateDetailScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedButton(
                     onClick = { onArchiveCrate(crate.id) },
-                    border = BorderStroke(1.dp, VxDangerRed),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = VxDangerRed),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp)
@@ -392,7 +393,7 @@ private fun ConditionMetricBox(
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(10.dp))
-            .background(VxSurfaceSubtle)
+            .background(VxTheme.surfaceSubtle)
             .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(10.dp))
             .padding(10.dp)
     ) {

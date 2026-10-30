@@ -16,7 +16,9 @@ data class UserLocationInfo(
     val cityName: String,
     val stateName: String,
     val nearestMandi: String,
-    val priceMultiplier: Float
+    val priceMultiplier: Float,
+    val latitude: Double = 28.6139,
+    val longitude: Double = 77.2090
 )
 
 class LocationMarketService(private val context: Context) {
@@ -26,17 +28,28 @@ class LocationMarketService(private val context: Context) {
             cityName = "Delhi",
             stateName = "Delhi NCR",
             nearestMandi = "Azadpur Mandi, Delhi",
-            priceMultiplier = 1.08f
+            priceMultiplier = 1.08f,
+            latitude = 28.7156,
+            longitude = 77.1788
         )
     )
     val currentLocation: StateFlow<UserLocationInfo> = _currentLocation.asStateFlow()
 
-    fun setLocation(cityName: String, stateName: String, nearestMandi: String, priceMultiplier: Float) {
+    fun setLocation(
+        cityName: String,
+        stateName: String,
+        nearestMandi: String,
+        priceMultiplier: Float,
+        latitude: Double = 28.6139,
+        longitude: Double = 77.2090
+    ) {
         _currentLocation.value = UserLocationInfo(
             cityName = cityName,
             stateName = stateName,
             nearestMandi = nearestMandi,
-            priceMultiplier = priceMultiplier
+            priceMultiplier = priceMultiplier,
+            latitude = latitude,
+            longitude = longitude
         )
     }
 
@@ -64,7 +77,9 @@ class LocationMarketService(private val context: Context) {
                         cityName = city,
                         stateName = state,
                         nearestMandi = mandiName,
-                        priceMultiplier = multiplier
+                        priceMultiplier = multiplier,
+                        latitude = gpsLocation.latitude,
+                        longitude = gpsLocation.longitude
                     )
                     _currentLocation.value = info
                     return@withContext info
@@ -79,7 +94,9 @@ class LocationMarketService(private val context: Context) {
             cityName = "Nashik",
             stateName = "Maharashtra",
             nearestMandi = "Lasalgaon & Nashik APMC",
-            priceMultiplier = 0.95f
+            priceMultiplier = 0.95f,
+            latitude = 20.1472,
+            longitude = 74.2255
         )
         _currentLocation.value = defaultInfo
         return@withContext defaultInfo

@@ -65,18 +65,7 @@ import com.example.data.model.ConnectionMode
 import com.example.ui.AuthUser
 import com.example.ui.components.OnlineBadge
 import com.example.ui.components.VisionXHeader
-import com.example.ui.theme.VxBorder
-import com.example.ui.theme.VxBorderGreen
-import com.example.ui.theme.VxDangerRed
-import com.example.ui.theme.VxEmerald
-import com.example.ui.theme.VxEmeraldDark
-import com.example.ui.theme.VxNavy
-import com.example.ui.theme.VxPrimaryBlue
-import com.example.ui.theme.VxSurfaceGreen
-import com.example.ui.theme.VxSurfaceSubtle
-import com.example.ui.theme.VxSurfaceWarning
-import com.example.ui.theme.VxWarningAmber
-import com.example.ui.theme.VxWarningDark
+import com.example.ui.theme.VxTheme
 
 @Composable
 fun SettingsScreen(
@@ -149,13 +138,13 @@ fun SettingsScreen(
                             modifier = Modifier
                                 .size(50.dp)
                                 .clip(CircleShape)
-                                .background(VxSurfaceSubtle),
+                                .background(VxTheme.surfaceSubtle),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Person,
                                 contentDescription = null,
-                                tint = VxPrimaryBlue,
+                                tint = VxTheme.primaryBlue,
                                 modifier = Modifier.size(28.dp)
                             )
                         }
@@ -205,14 +194,14 @@ fun SettingsScreen(
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(if (deviceConnected) VxSurfaceGreen else VxSurfaceWarning)
+                                    .background(if (deviceConnected) VxTheme.surfaceGreen else VxTheme.surfaceWarning)
                                     .padding(horizontal = 8.dp, vertical = 3.dp)
                             ) {
                                 Text(
                                     text = if (deviceConnected) "Connected" else "Offline",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (deviceConnected) VxEmeraldDark else VxWarningDark
+                                    color = if (deviceConnected) VxTheme.emeraldDark else VxTheme.warningDark
                                 )
                             }
                         }
@@ -243,7 +232,7 @@ fun SettingsScreen(
                                 Surface(
                                     onClick = { onSetConnectionMode(mode) },
                                     shape = RoundedCornerShape(8.dp),
-                                    color = if (isSelected) VxPrimaryBlue else VxSurfaceSubtle,
+                                    color = if (isSelected) VxTheme.primaryBlue else VxTheme.surfaceSubtle,
                                     modifier = Modifier
                                         .weight(1f)
                                         .testTag("mode_${mode.name}")
@@ -282,7 +271,7 @@ fun SettingsScreen(
                         Button(
                             onClick = onOpenPiGuide,
                             shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = VxPrimaryBlue),
+                            colors = ButtonDefaults.buttonColors(containerColor = VxTheme.primaryBlue),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("open_pi_guide_button")
@@ -365,7 +354,7 @@ fun SettingsScreen(
                                 onCheckedChange = { autoSync = it },
                                 colors = SwitchDefaults.colors(
                                     checkedThumbColor = Color.White,
-                                    checkedTrackColor = VxPrimaryBlue
+                                    checkedTrackColor = VxTheme.primaryBlue
                                 )
                             )
                         }
@@ -380,14 +369,14 @@ fun SettingsScreen(
                             Text(
                                 text = "Current State: $syncStatus",
                                 fontSize = 12.sp,
-                                color = VxEmeraldDark,
+                                color = VxTheme.emeraldDark,
                                 fontWeight = FontWeight.Bold
                             )
 
                             Button(
                                 onClick = onTriggerSync,
                                 shape = RoundedCornerShape(8.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = VxPrimaryBlue),
+                                colors = ButtonDefaults.buttonColors(containerColor = VxTheme.primaryBlue),
                                 modifier = Modifier.testTag("sync_now_button")
                             ) {
                                 Icon(imageVector = Icons.Default.Sync, contentDescription = null, modifier = Modifier.size(16.dp))
@@ -422,7 +411,7 @@ fun SettingsScreen(
                             Icon(
                                 imageVector = Icons.Default.Info,
                                 contentDescription = null,
-                                tint = VxPrimaryBlue,
+                                tint = VxTheme.primaryBlue,
                                 modifier = Modifier.size(22.dp)
                             )
                             Spacer(modifier = Modifier.width(12.dp))
@@ -449,7 +438,7 @@ fun SettingsScreen(
             item {
                 Button(
                     onClick = onLogout,
-                    colors = ButtonDefaults.buttonColors(containerColor = VxDangerRed),
+                    colors = ButtonDefaults.buttonColors(containerColor = VxTheme.errorRed),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -478,7 +467,7 @@ fun SettingsScreen(
                         onValueChange = { hostInput = it },
                         label = { Text("API URL") },
                         singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = VxPrimaryBlue),
+                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = VxTheme.primaryBlue),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -489,7 +478,7 @@ fun SettingsScreen(
                         onSetRaspberryPiHost(hostInput)
                         showHostDialog = false
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = VxPrimaryBlue)
+                    colors = ButtonDefaults.buttonColors(containerColor = VxTheme.primaryBlue)
                 ) {
                     Text("Save & Connect")
                 }
@@ -545,7 +534,7 @@ private fun NotificationToggleRow(
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = Color.White,
-                checkedTrackColor = VxPrimaryBlue
+                checkedTrackColor = VxTheme.primaryBlue
             )
         )
     }

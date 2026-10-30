@@ -43,6 +43,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Stop
@@ -79,20 +80,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.example.ui.components.VisionXHeader
-import com.example.ui.theme.VxBorder
-import com.example.ui.theme.VxBorderGreen
-import com.example.ui.theme.VxEmerald
-import com.example.ui.theme.VxError
-import com.example.ui.theme.VxNavy
-import com.example.ui.theme.VxPrimaryAccent
-import com.example.ui.theme.VxPrimaryBlue
-import com.example.ui.theme.VxSuccess
-import com.example.ui.theme.VxSurfaceBlue
-import com.example.ui.theme.VxSurfaceCard
-import com.example.ui.theme.VxSurfaceGreen
-import com.example.ui.theme.VxSurfaceSubtle
-import com.example.ui.theme.VxTextPrimary
-import com.example.ui.theme.VxTextSecondary
+import com.example.ui.theme.VxTheme
 import com.example.util.AppTranslations
 import com.example.util.FarmerQuestionType
 import com.example.util.IndianLanguage
@@ -244,7 +232,7 @@ fun VoiceAssistantScreen(
                         text = "🌐 ${AppTranslations.get("language", selectedLanguage)} / Select Language",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        color = VxTextPrimary
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     LazyRow(
@@ -256,8 +244,8 @@ fun VoiceAssistantScreen(
                             Surface(
                                 onClick = { onSelectLanguage(lang) },
                                 shape = RoundedCornerShape(20.dp),
-                                color = if (isSelected) VxPrimaryBlue else VxSurfaceCard,
-                                border = BorderStroke(1.dp, if (isSelected) VxPrimaryBlue else VxBorder),
+                                color = if (isSelected) VxTheme.primaryBlue else MaterialTheme.colorScheme.surface,
+                                border = BorderStroke(1.dp, if (isSelected) VxTheme.primaryBlue else MaterialTheme.colorScheme.outline),
                                 modifier = Modifier.testTag("lang_chip_${lang.code}")
                             ) {
                                 Row(
@@ -270,18 +258,47 @@ fun VoiceAssistantScreen(
                                         text = lang.nativeName,
                                         fontSize = 13.sp,
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                        color = if (isSelected) Color.White else VxTextPrimary
+                                        color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface
                                     )
                                     if (lang != IndianLanguage.ENGLISH && lang != IndianLanguage.HINDI) {
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text(
                                             text = "(${lang.displayName})",
                                             fontSize = 10.sp,
-                                            color = if (isSelected) Color.White.copy(alpha = 0.8f) else VxTextSecondary
+                                            color = if (isSelected) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
                                 }
                             }
+                        }
+                    }
+                }
+
+                // Gemini AI Status Pill
+                item {
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = VxTheme.purple.copy(alpha = 0.12f),
+                        border = BorderStroke(1.dp, VxTheme.purple.copy(alpha = 0.35f)),
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AutoAwesome,
+                                contentDescription = "Gemini",
+                                tint = VxTheme.purple,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Powered by Gemini 3.8 Flash AI",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = VxTheme.purple
+                            )
                         }
                     }
                 }
@@ -292,11 +309,11 @@ fun VoiceAssistantScreen(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = if (isSpeaking) VxSurfaceGreen else if (isListening) VxSurfaceBlue else VxSurfaceCard
+                            containerColor = if (isSpeaking) VxTheme.surfaceGreen else if (isListening) VxTheme.surfaceBlue else MaterialTheme.colorScheme.surface
                         ),
                         border = BorderStroke(
                             width = 2.dp,
-                            color = if (isSpeaking) VxSuccess else if (isListening) VxPrimaryBlue else VxBorder
+                            color = if (isSpeaking) VxTheme.success else if (isListening) VxTheme.primaryBlue else MaterialTheme.colorScheme.outline
                         )
                     ) {
                         Column(
@@ -313,11 +330,11 @@ fun VoiceAssistantScreen(
                                     .scale(if (isListening || isSpeaking) pulseScale else 1f)
                                     .clip(CircleShape)
                                     .background(
-                                        if (isSpeaking) VxSuccess else if (isListening) VxError else VxPrimaryBlue
+                                        if (isSpeaking) VxTheme.success else if (isListening) VxTheme.errorRed else VxTheme.primaryBlue
                                     )
                                     .border(
                                         4.dp,
-                                        if (isSpeaking) VxBorderGreen else VxSurfaceBlue,
+                                        if (isSpeaking) VxTheme.borderGreen else VxTheme.surfaceBlue,
                                         CircleShape
                                     )
                                     .clickable { handleMicClick() }
@@ -341,14 +358,14 @@ fun VoiceAssistantScreen(
                                 },
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (isSpeaking) VxSuccess else VxTextPrimary,
+                                color = if (isSpeaking) VxTheme.success else MaterialTheme.colorScheme.onSurface,
                                 textAlign = TextAlign.Center
                             )
 
                             Text(
                                 text = "इस डिवाइस, कोल्ड स्टोरेज तापमान या फसल के बारे में कुछ भी पूछें",
                                 fontSize = 12.sp,
-                                color = VxTextSecondary,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.padding(top = 4.dp)
                             )
@@ -362,7 +379,7 @@ fun VoiceAssistantScreen(
                             ) {
                                 Button(
                                     onClick = onSpeakCurrentStatus,
-                                    colors = ButtonDefaults.buttonColors(containerColor = VxPrimaryBlue),
+                                    colors = ButtonDefaults.buttonColors(containerColor = VxTheme.primaryBlue),
                                     shape = RoundedCornerShape(10.dp),
                                     modifier = Modifier.weight(1f)
                                 ) {
@@ -374,7 +391,7 @@ fun VoiceAssistantScreen(
                                 if (isSpeaking) {
                                     Button(
                                         onClick = onStopSpeaking,
-                                        colors = ButtonDefaults.buttonColors(containerColor = VxError),
+                                        colors = ButtonDefaults.buttonColors(containerColor = VxTheme.errorRed),
                                         shape = RoundedCornerShape(10.dp)
                                     ) {
                                         Icon(imageVector = Icons.Default.Stop, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -387,7 +404,7 @@ fun VoiceAssistantScreen(
                             if (speechError != null) {
                                 Text(
                                     text = speechError ?: "",
-                                    color = VxError,
+                                    color = VxTheme.errorRed,
                                     fontSize = 12.sp,
                                     modifier = Modifier.padding(top = 8.dp)
                                 )
@@ -402,15 +419,15 @@ fun VoiceAssistantScreen(
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = VxSurfaceGreen),
-                            border = BorderStroke(1.dp, VxBorderGreen)
+                            colors = CardDefaults.cardColors(containerColor = VxTheme.surfaceGreen),
+                            border = BorderStroke(1.dp, VxTheme.borderGreen)
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
                                         imageVector = Icons.Default.VolumeUp,
                                         contentDescription = null,
-                                        tint = VxSuccess,
+                                        tint = VxTheme.success,
                                         modifier = Modifier.size(20.dp)
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
@@ -418,14 +435,14 @@ fun VoiceAssistantScreen(
                                         text = "डिवाइस का जवाब (Voice Response):",
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 13.sp,
-                                        color = VxSuccess
+                                        color = VxTheme.success
                                     )
                                 }
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
                                     text = lastSpokenText,
                                     fontSize = 14.sp,
-                                    color = VxTextPrimary,
+                                    color = MaterialTheme.colorScheme.onSurface,
                                     lineHeight = 20.sp
                                 )
                             }
@@ -439,7 +456,7 @@ fun VoiceAssistantScreen(
                         text = "⚡ ${AppTranslations.get("quick_questions", selectedLanguage)}",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
-                        color = VxTextPrimary
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
@@ -447,8 +464,8 @@ fun VoiceAssistantScreen(
                     Surface(
                         onClick = { onAskFarmerQuestion(qType) },
                         shape = RoundedCornerShape(12.dp),
-                        color = VxSurfaceCard,
-                        border = BorderStroke(1.dp, VxBorder),
+                        color = MaterialTheme.colorScheme.surface,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                         modifier = Modifier
                             .fillMaxWidth()
                             .testTag("quick_question_${qType.name.lowercase()}")
@@ -471,12 +488,12 @@ fun VoiceAssistantScreen(
                                         text = qType.hindiTitle,
                                         fontSize = 14.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = VxTextPrimary
+                                        color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(
                                         text = qType.englishTitle,
                                         fontSize = 11.sp,
-                                        color = VxTextSecondary
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                             }
@@ -484,13 +501,13 @@ fun VoiceAssistantScreen(
                                 modifier = Modifier
                                     .size(36.dp)
                                     .clip(CircleShape)
-                                    .background(VxSurfaceBlue),
+                                    .background(VxTheme.surfaceBlue),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.VolumeUp,
                                     contentDescription = "Speak answer",
-                                    tint = VxPrimaryBlue,
+                                    tint = VxTheme.primaryBlue,
                                     modifier = Modifier.size(18.dp)
                                 )
                             }
@@ -505,7 +522,7 @@ fun VoiceAssistantScreen(
                         text = "✍️ लिखकर पूछें (Type question)",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = VxTextPrimary
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Row(
@@ -519,8 +536,8 @@ fun VoiceAssistantScreen(
                             singleLine = true,
                             shape = RoundedCornerShape(10.dp),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = VxPrimaryBlue,
-                                unfocusedBorderColor = VxBorder
+                                focusedBorderColor = VxTheme.primaryBlue,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline
                             ),
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
                             keyboardActions = KeyboardActions(
@@ -544,7 +561,7 @@ fun VoiceAssistantScreen(
                             modifier = Modifier
                                 .size(48.dp)
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(VxPrimaryBlue)
+                                .background(VxTheme.primaryBlue)
                                 .testTag("voice_assistant_send_button")
                         ) {
                             Icon(imageVector = Icons.Default.Send, contentDescription = "Send", tint = Color.White)

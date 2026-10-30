@@ -65,23 +65,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.components.VisionXHeader
-import com.example.ui.theme.VxBorderBlue
-import com.example.ui.theme.VxBorderGreen
-import com.example.ui.theme.VxBorderSubtle
-import com.example.ui.theme.VxBorderWarning
-import com.example.ui.theme.VxCyanAccent
-import com.example.ui.theme.VxEmerald
-import com.example.ui.theme.VxEmeraldDark
-import com.example.ui.theme.VxNavy
-import com.example.ui.theme.VxNavyDark
-import com.example.ui.theme.VxPrimaryBlue
-import com.example.ui.theme.VxSlateBlue
-import com.example.ui.theme.VxSurfaceBlue
-import com.example.ui.theme.VxSurfaceGreen
-import com.example.ui.theme.VxSurfaceSubtle
-import com.example.ui.theme.VxSurfaceWarning
-import com.example.ui.theme.VxWarningAmber
-import com.example.ui.theme.VxWarningDark
+import com.example.ui.theme.VxTheme
 
 /**
  * Complete, 100% English-typed Raspberry Pi 5 & IoT Hardware Engineering Guide.
@@ -151,13 +135,13 @@ fun PiDatabaseGuideScreen(
                                     modifier = Modifier
                                         .size(36.dp)
                                         .clip(RoundedCornerShape(8.dp))
-                                        .background(VxSurfaceBlue),
+                                        .background(VxTheme.surfaceBlue),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.DeveloperBoard,
                                         contentDescription = null,
-                                        tint = VxPrimaryBlue,
+                                        tint = VxTheme.primaryBlue,
                                         modifier = Modifier.size(20.dp)
                                     )
                                 }
@@ -181,15 +165,15 @@ fun PiDatabaseGuideScreen(
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(if (deviceConnected) VxSurfaceGreen else VxSurfaceWarning)
-                                    .border(1.dp, if (deviceConnected) VxBorderGreen else VxBorderWarning, RoundedCornerShape(12.dp))
+                                    .background(if (deviceConnected) VxTheme.surfaceGreen else VxTheme.surfaceWarning)
+                                    .border(1.dp, if (deviceConnected) VxTheme.borderGreen else VxTheme.borderWarning, RoundedCornerShape(12.dp))
                                     .padding(horizontal = 8.dp, vertical = 3.dp)
                             ) {
                                 Text(
                                     text = if (deviceConnected) "Connected" else "Waiting for Pi",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (deviceConnected) VxEmeraldDark else VxWarningDark
+                                    color = if (deviceConnected) VxTheme.emeraldDark else VxTheme.warningDark
                                 )
                             }
                         }
@@ -204,7 +188,7 @@ fun PiDatabaseGuideScreen(
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = VxPrimaryBlue,
+                                focusedBorderColor = VxTheme.primaryBlue,
                                 unfocusedBorderColor = MaterialTheme.colorScheme.outline
                             ),
                             modifier = Modifier
@@ -217,7 +201,7 @@ fun PiDatabaseGuideScreen(
                         Button(
                             onClick = { onSaveHost(hostInput) },
                             shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = VxPrimaryBlue),
+                            colors = ButtonDefaults.buttonColors(containerColor = VxTheme.primaryBlue),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(44.dp)
@@ -237,7 +221,7 @@ fun PiDatabaseGuideScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
-                        .background(VxSurfaceSubtle)
+                        .background(VxTheme.surfaceSubtle)
                         .padding(3.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -246,7 +230,7 @@ fun PiDatabaseGuideScreen(
                         Surface(
                             onClick = { selectedTab = index },
                             shape = RoundedCornerShape(8.dp),
-                            color = if (isSelected) VxPrimaryBlue else Color.Transparent,
+                            color = if (isSelected) VxTheme.primaryBlue else Color.Transparent,
                             modifier = Modifier.weight(1f)
                         ) {
                             Text(
@@ -376,7 +360,7 @@ private fun TechFlowStepCard(
     description: String
 ) {
     Surface(
-        color = VxSurfaceSubtle,
+        color = VxTheme.surfaceSubtle,
         shape = RoundedCornerShape(12.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         modifier = Modifier
@@ -394,7 +378,7 @@ private fun TechFlowStepCard(
                         modifier = Modifier
                             .size(24.dp)
                             .clip(CircleShape)
-                            .background(VxPrimaryBlue),
+                            .background(VxTheme.primaryBlue),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(text = stepNumber, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
@@ -412,7 +396,7 @@ private fun TechFlowStepCard(
                     text = protocols,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = VxSlateBlue
+                    color = VxTheme.primaryAccent
                 )
             }
 
@@ -654,13 +638,13 @@ private fun LoraModuleSupportContent() {
                         modifier = Modifier
                             .size(36.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .background(VxSurfaceBlue),
+                            .background(VxTheme.surfaceBlue),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Radio,
                             contentDescription = null,
-                            tint = VxPrimaryBlue,
+                            tint = VxTheme.primaryBlue,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -784,13 +768,13 @@ private fun EdgeAiModelContent() {
                         modifier = Modifier
                             .size(36.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .background(VxSurfaceBlue),
+                            .background(VxTheme.surfaceBlue),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.AutoAwesome,
                             contentDescription = null,
-                            tint = VxPrimaryBlue,
+                            tint = VxTheme.primaryBlue,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -854,7 +838,7 @@ model = ctypes.CDLL("./libvisionx_model.so")
 @Composable
 private fun SpecRow(label: String, value: String) {
     Column(modifier = Modifier.padding(vertical = 4.dp)) {
-        Text(text = label, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = VxSlateBlue)
+        Text(text = label, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(text = value, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface)
         HorizontalDivider(modifier = Modifier.padding(top = 4.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
     }
@@ -872,14 +856,14 @@ private fun WiringRow(sensor: String, pinName: String, gpio: String, purpose: St
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(text = sensor, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-            Text(text = gpio, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = VxPrimaryBlue)
+            Text(text = gpio, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = VxTheme.primaryBlue)
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(text = pinName, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(text = purpose, fontSize = 11.sp, color = VxEmeraldDark, fontWeight = FontWeight.Medium)
+            Text(text = purpose, fontSize = 11.sp, color = VxTheme.emeraldDark, fontWeight = FontWeight.Medium)
         }
         HorizontalDivider(modifier = Modifier.padding(top = 6.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
     }
@@ -905,7 +889,7 @@ private fun GuideCard(
                     modifier = Modifier
                         .size(28.dp)
                         .clip(CircleShape)
-                        .background(VxPrimaryBlue),
+                        .background(VxTheme.primaryBlue),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(text = stepNumber, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
@@ -931,7 +915,7 @@ private fun CodeSnippet(code: String) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
-            .background(VxNavyDark)
+            .background(VxTheme.navyDark)
             .border(1.dp, Color(0xFF1E2D4A), RoundedCornerShape(10.dp))
             .padding(12.dp)
     ) {
@@ -941,7 +925,7 @@ private fun CodeSnippet(code: String) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "CODE / CONFIGURATION", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = VxCyanAccent)
+                Text(text = "CODE / CONFIGURATION", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = VxTheme.cyanAccent)
                 IconButton(
                     onClick = {
                         clipboard.setText(AnnotatedString(code))
@@ -953,7 +937,7 @@ private fun CodeSnippet(code: String) {
                     Icon(
                         imageVector = if (copied) Icons.Default.Check else Icons.Default.ContentCopy,
                         contentDescription = "Copy",
-                        tint = if (copied) VxEmerald else Color(0xFF94A3B8),
+                        tint = if (copied) VxTheme.emerald else Color(0xFF94A3B8),
                         modifier = Modifier.size(16.dp)
                     )
                 }

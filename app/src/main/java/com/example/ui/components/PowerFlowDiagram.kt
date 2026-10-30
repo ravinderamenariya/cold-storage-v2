@@ -44,23 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.PowerData
-import com.example.ui.theme.VxBorder
-import com.example.ui.theme.VxBorderBlue
-import com.example.ui.theme.VxBorderGreen
-import com.example.ui.theme.VxBorderWarning
-import com.example.ui.theme.VxCyanAccent
-import com.example.ui.theme.VxEmerald
-import com.example.ui.theme.VxEmeraldDark
-import com.example.ui.theme.VxNavy
-import com.example.ui.theme.VxPrimaryBlue
-import com.example.ui.theme.VxSurfaceBlue
-import com.example.ui.theme.VxSurfaceGreen
-import com.example.ui.theme.VxSurfaceSubtle
-import com.example.ui.theme.VxSurfaceWarning
-import com.example.ui.theme.VxTextMuted
-import com.example.ui.theme.VxTextSecondary
-import com.example.ui.theme.VxWarningAmber
-import com.example.ui.theme.VxWarningDark
+import com.example.ui.theme.VxTheme
 
 /**
  * Animated Power Flow Diagram:
@@ -116,8 +100,8 @@ fun PowerFlowDiagram(
                     icon = Icons.Default.SolarPower,
                     label = "Solar Panel",
                     subValue = "${powerData.solarInputWatts.toInt()} W",
-                    color = VxWarningAmber,
-                    bgColor = VxSurfaceWarning
+                    color = VxTheme.warningAmber,
+                    bgColor = VxTheme.surfaceWarning
                 )
 
                 // Connector 1
@@ -128,8 +112,8 @@ fun PowerFlowDiagram(
                     icon = Icons.Default.SettingsInputComponent,
                     label = "Controller",
                     subValue = "MPPT Active",
-                    color = VxPrimaryBlue,
-                    bgColor = VxSurfaceBlue
+                    color = VxTheme.primaryBlue,
+                    bgColor = VxTheme.surfaceBlue
                 )
 
                 // Connector 2
@@ -140,8 +124,8 @@ fun PowerFlowDiagram(
                     icon = Icons.Default.BatteryChargingFull,
                     label = "Battery",
                     subValue = "${powerData.batteryPercent}%",
-                    color = VxEmerald,
-                    bgColor = VxSurfaceGreen
+                    color = VxTheme.emerald,
+                    bgColor = VxTheme.surfaceGreen
                 )
             }
 
@@ -157,7 +141,7 @@ fun PowerFlowDiagram(
                     text = "↓",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = VxPrimaryBlue.copy(alpha = pulse)
+                    color = VxTheme.primaryBlue.copy(alpha = pulse)
                 )
             }
 
@@ -168,7 +152,7 @@ fun PowerFlowDiagram(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
-                    .background(VxSurfaceSubtle)
+                    .background(VxTheme.surfaceSubtle)
                     .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
                     .padding(12.dp)
             ) {
@@ -182,13 +166,13 @@ fun PowerFlowDiagram(
                             modifier = Modifier
                                 .size(34.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(VxNavy),
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Power,
                                 contentDescription = null,
-                                tint = VxCyanAccent,
+                                tint = VxTheme.cyanAccent,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -213,12 +197,12 @@ fun PowerFlowDiagram(
                             text = "480 W Active",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
-                            color = VxEmeraldDark
+                            color = VxTheme.emeraldDark
                         )
                         Text(
                             text = "Cooling System ON",
                             fontSize = 10.sp,
-                            color = VxEmeraldDark
+                            color = VxTheme.emeraldDark
                         )
                     }
                 }
@@ -279,6 +263,6 @@ private fun FlowArrow(
         text = "→",
         fontSize = 18.sp,
         fontWeight = FontWeight.Bold,
-        color = if (isActive) VxPrimaryBlue.copy(alpha = pulse) else VxTextMuted
+        color = if (isActive) VxTheme.primaryBlue.copy(alpha = pulse) else MaterialTheme.colorScheme.onSurfaceVariant
     )
 }

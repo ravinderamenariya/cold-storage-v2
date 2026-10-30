@@ -11,12 +11,16 @@ import androidx.compose.ui.Modifier
 import com.example.ui.AppViewModel
 import com.example.ui.navigation.AppNavigation
 import com.example.ui.theme.VisionXTheme
+import com.example.util.configureAppCheck
 
 class MainActivity : ComponentActivity() {
     private val viewModel: AppViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Configure Firebase App Check with launch intent before any UI or Firebase operations
+        configureAppCheck(this, intent)
+
         enableEdgeToEdge()
         setContent {
             VisionXTheme {

@@ -28,17 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.Crate
-import com.example.ui.theme.VxBorder
-import com.example.ui.theme.VxBorderBlue
-import com.example.ui.theme.VxBorderGreen
-import com.example.ui.theme.VxEmeraldDark
-import com.example.ui.theme.VxPrimaryBlue
-import com.example.ui.theme.VxSurfaceBlue
-import com.example.ui.theme.VxSurfaceCard
-import com.example.ui.theme.VxSurfaceGreen
-import com.example.ui.theme.VxSurfaceSubtle
-import com.example.ui.theme.VxTextPrimary
-import com.example.ui.theme.VxTextSecondary
+import com.example.ui.theme.VxTheme
 import com.example.util.AppTranslations
 import com.example.util.IndianLanguage
 
@@ -55,8 +45,8 @@ fun ChamberProduceStockCard(
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = VxSurfaceCard),
-        border = BorderStroke(1.dp, VxBorder),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = modifier
             .fillMaxWidth()
@@ -73,12 +63,12 @@ fun ChamberProduceStockCard(
                         text = "📦 कमरों में रखी फसलें (Crops in Chambers)",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
-                        color = VxTextPrimary
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = "Chamber 1 & Chamber 2 stored produce breakdown",
                         fontSize = 11.sp,
-                        color = VxTextSecondary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -88,9 +78,9 @@ fun ChamberProduceStockCard(
             // Chamber 1 Items
             ChamberRow(
                 chamberTitle = "कमरा 1 (Chamber 1 • 12°C)",
-                badgeColor = VxSurfaceGreen,
-                borderColor = VxBorderGreen,
-                textColor = VxEmeraldDark,
+                badgeColor = VxTheme.surfaceGreen,
+                borderColor = VxTheme.borderGreen,
+                textColor = VxTheme.emerald,
                 crates = chamber1Crates,
                 onSpeakStock = onSpeakStock
             )
@@ -100,9 +90,9 @@ fun ChamberProduceStockCard(
             // Chamber 2 Items
             ChamberRow(
                 chamberTitle = "कमरा 2 (Chamber 2 • 4°C)",
-                badgeColor = VxSurfaceBlue,
-                borderColor = VxBorderBlue,
-                textColor = VxPrimaryBlue,
+                badgeColor = VxTheme.surfaceBlue,
+                borderColor = VxTheme.borderBlue,
+                textColor = VxTheme.primaryBlue,
                 crates = chamber2Crates,
                 onSpeakStock = onSpeakStock
             )
@@ -121,8 +111,8 @@ private fun ChamberRow(
 ) {
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = VxSurfaceSubtle,
-        border = BorderStroke(1.dp, VxBorder),
+        color = VxTheme.surfaceSubtle,
+        border = BorderStroke(1.dp, VxTheme.border),
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
@@ -149,7 +139,7 @@ private fun ChamberRow(
                     text = "${crates.size} पेटियां (${crates.sumOf { it.quantity }.toInt()} kg)",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = VxTextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -159,7 +149,7 @@ private fun ChamberRow(
                 Text(
                     text = "यह कमरा अभी खाली है (No crates stored)",
                     fontSize = 12.sp,
-                    color = VxTextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else {
                 Row(
@@ -173,7 +163,7 @@ private fun ChamberRow(
                             },
                             shape = RoundedCornerShape(10.dp),
                             color = MaterialTheme.colorScheme.surface,
-                            border = BorderStroke(1.dp, VxBorder),
+                            border = BorderStroke(1.dp, VxTheme.border),
                             modifier = Modifier.weight(1f)
                         ) {
                             Row(
@@ -190,13 +180,13 @@ private fun ChamberRow(
                                         text = crate.product,
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = VxTextPrimary,
+                                        color = MaterialTheme.colorScheme.onSurface,
                                         maxLines = 1
                                     )
                                     Text(
                                         text = "${crate.quantity.toInt()} ${crate.unit}",
                                         fontSize = 10.sp,
-                                        color = VxTextSecondary
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                             }

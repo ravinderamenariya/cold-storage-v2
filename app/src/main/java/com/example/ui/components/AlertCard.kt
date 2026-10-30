@@ -39,19 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.AlertItem
 import com.example.data.model.AlertSeverity
-import com.example.ui.theme.VxBorder
-import com.example.ui.theme.VxBorderBlue
-import com.example.ui.theme.VxBorderDanger
-import com.example.ui.theme.VxBorderWarning
-import com.example.ui.theme.VxDangerDark
-import com.example.ui.theme.VxDangerRed
-import com.example.ui.theme.VxPrimaryBlue
-import com.example.ui.theme.VxSurfaceBlue
-import com.example.ui.theme.VxSurfaceDanger
-import com.example.ui.theme.VxSurfaceSubtle
-import com.example.ui.theme.VxSurfaceWarning
-import com.example.ui.theme.VxWarningAmber
-import com.example.ui.theme.VxWarningDark
+import com.example.ui.theme.VxTheme
 
 /**
  * Format relative time (e.g. 2 hours ago).
@@ -82,21 +70,21 @@ fun AlertCard(
 ) {
     val (iconColor, bgColor, borderColor, icon) = when (alert.severity) {
         AlertSeverity.CRITICAL -> AlertVisuals(
-            VxDangerDark,
-            VxSurfaceDanger.copy(alpha = 0.6f),
-            VxBorderDanger,
+            VxTheme.errorRed,
+            VxTheme.surfaceDanger,
+            VxTheme.borderDanger,
             Icons.Default.Error
         )
         AlertSeverity.WARNING -> AlertVisuals(
-            VxWarningDark,
-            VxSurfaceWarning.copy(alpha = 0.6f),
-            VxBorderWarning,
+            VxTheme.warningAmber,
+            VxTheme.surfaceWarning,
+            VxTheme.borderWarning,
             Icons.Default.Warning
         )
         AlertSeverity.INFO -> AlertVisuals(
-            VxPrimaryBlue,
-            VxSurfaceBlue.copy(alpha = 0.6f),
-            VxBorderBlue,
+            VxTheme.primaryBlue,
+            VxTheme.surfaceBlue,
+            VxTheme.borderBlue,
             Icons.Default.Info
         )
     }
@@ -130,7 +118,7 @@ fun AlertCard(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(if (alert.isRead) VxSurfaceSubtle else bgColor),
+                        .background(if (alert.isRead) VxTheme.surfaceSubtle else bgColor),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(

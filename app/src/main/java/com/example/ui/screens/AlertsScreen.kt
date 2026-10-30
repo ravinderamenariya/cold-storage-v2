@@ -46,6 +46,7 @@ import com.example.ui.theme.VxBorder
 import com.example.ui.theme.VxDangerRed
 import com.example.ui.theme.VxNavy
 import com.example.ui.theme.VxPrimaryBlue
+import com.example.ui.theme.VxTheme
 import com.example.ui.theme.VxWarningAmber
 
 @Composable
@@ -102,10 +103,10 @@ fun AlertsScreen(
                     listOf("All", "Mandi Price", "Critical", "Warning").forEach { cat ->
                         val isSelected = cat == selectedCategory
                         val chipColor = when (cat) {
-                            "Critical" -> if (isSelected) VxDangerRed else MaterialTheme.colorScheme.surface
-                            "Warning" -> if (isSelected) VxWarningAmber else MaterialTheme.colorScheme.surface
-                            "Mandi Price" -> if (isSelected) com.example.ui.theme.VxEmeraldDark else MaterialTheme.colorScheme.surface
-                            else -> if (isSelected) VxPrimaryBlue else MaterialTheme.colorScheme.surface
+                            "Critical" -> if (isSelected) VxTheme.errorRed else MaterialTheme.colorScheme.surface
+                            "Warning" -> if (isSelected) VxTheme.warningDark else MaterialTheme.colorScheme.surface
+                            "Mandi Price" -> if (isSelected) VxTheme.emeraldDark else MaterialTheme.colorScheme.surface
+                            else -> if (isSelected) VxTheme.primaryBlue else MaterialTheme.colorScheme.surface
                         }
 
                         Surface(
@@ -135,7 +136,7 @@ fun AlertsScreen(
                     onClick = onMarkAllAsRead,
                     shape = RoundedCornerShape(10.dp),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = VxPrimaryBlue),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = VxTheme.primaryBlue),
                     modifier = Modifier.testTag("mark_all_alerts_read_button")
                 ) {
                     Icon(

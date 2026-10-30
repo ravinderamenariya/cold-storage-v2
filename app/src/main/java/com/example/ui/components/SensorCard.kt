@@ -56,31 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.ChamberData
 import com.example.data.model.PowerData
-import com.example.ui.theme.VxBorderBlue
-import com.example.ui.theme.VxBorderGreen
-import com.example.ui.theme.VxBorderPurple
-import com.example.ui.theme.VxBorderSubtle
-import com.example.ui.theme.VxBorderWarning
-import com.example.ui.theme.VxCyanAccent
-import com.example.ui.theme.VxDangerDark
-import com.example.ui.theme.VxDangerRed
-import com.example.ui.theme.VxEmerald
-import com.example.ui.theme.VxEmeraldAccent
-import com.example.ui.theme.VxEmeraldDark
-import com.example.ui.theme.VxNavy
-import com.example.ui.theme.VxPrimaryBlue
-import com.example.ui.theme.VxPurple
-import com.example.ui.theme.VxSurfaceBlue
-import com.example.ui.theme.VxSurfaceDanger
-import com.example.ui.theme.VxSurfaceGreen
-import com.example.ui.theme.VxSurfacePurple
-import com.example.ui.theme.VxSurfaceSubtle
-import com.example.ui.theme.VxSurfaceWarning
-import com.example.ui.theme.VxTextMuted
-import com.example.ui.theme.VxTextPrimary
-import com.example.ui.theme.VxTextSecondary
-import com.example.ui.theme.VxWarningAmber
-import com.example.ui.theme.VxWarningDark
+import com.example.ui.theme.VxTheme
 import kotlin.math.abs
 
 /**
@@ -117,7 +93,7 @@ fun SystemStatusHeroCard(
                         modifier = Modifier
                             .size(10.dp)
                             .clip(CircleShape)
-                            .background(VxEmerald)
+                            .background(VxTheme.emerald)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -139,7 +115,7 @@ fun SystemStatusHeroCard(
                     Text(
                         text = "$chamberCount Chambers Monitored",
                         fontSize = 12.sp,
-                        color = VxPrimaryBlue,
+                        color = VxTheme.primaryBlue,
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
@@ -160,22 +136,22 @@ fun SystemStatusHeroCard(
                 modifier = Modifier
                     .size(64.dp)
                     .clip(RoundedCornerShape(14.dp))
-                    .background(VxSurfaceBlue)
-                    .border(1.dp, VxBorderBlue, RoundedCornerShape(14.dp)),
+                    .background(VxTheme.surfaceBlue)
+                    .border(1.dp, VxTheme.borderBlue, RoundedCornerShape(14.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
                         imageVector = Icons.Default.Thermostat,
                         contentDescription = null,
-                        tint = VxPrimaryBlue,
+                        tint = VxTheme.primaryBlue,
                         modifier = Modifier.size(28.dp)
                     )
                     Text(
                         text = "ACTIVE",
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
-                        color = VxPrimaryBlue
+                        color = VxTheme.primaryBlue
                     )
                 }
             }
@@ -196,9 +172,9 @@ fun ChamberSensorCard(
     modifier: Modifier = Modifier
 ) {
     val isNormal = data.status.equals("Normal", ignoreCase = true)
-    val accentColor = if (isChamber1) VxPrimaryBlue else VxEmerald
-    val bgColor = if (isChamber1) VxSurfaceBlue.copy(alpha = 0.5f) else VxSurfaceGreen.copy(alpha = 0.5f)
-    val borderColor = if (isChamber1) VxBorderBlue else VxBorderGreen
+    val accentColor = if (isChamber1) VxTheme.primaryBlue else VxTheme.emerald
+    val bgColor = if (isChamber1) VxTheme.surfaceBlue.copy(alpha = 0.5f) else VxTheme.surfaceGreen.copy(alpha = 0.5f)
+    val borderColor = if (isChamber1) VxTheme.borderBlue else VxTheme.borderGreen
     val deltaFromOutside = String.format("%.1f", outsideTemp - data.currentTemp)
 
     Card(
@@ -251,54 +227,40 @@ fun ChamberSensorCard(
                     modifier = Modifier
                         .size(20.dp)
                         .clip(CircleShape)
-                        .background(if (isNormal) VxSurfaceGreen else VxSurfaceWarning),
+                        .background(if (isNormal) VxTheme.surfaceGreen else VxTheme.surfaceWarning),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
-                        tint = if (isNormal) VxEmeraldDark else VxWarningDark,
+                        tint = if (isNormal) VxTheme.emeraldDark else VxTheme.warningDark,
                         modifier = Modifier.size(13.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
-            // Temperature Value (Large)
-            Row(verticalAlignment = Alignment.Bottom) {
-                Text(
-                    text = "${data.currentTemp}",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+            // Circular Arc Temperature Gauge
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                TemperatureGauge(
+                    temperature = data.currentTemp,
+                    targetTemp = data.targetTemp,
+                    minTemp = -5.0,
+                    maxTemp = 35.0,
+                    size = 105.dp,
+                    strokeWidth = 8.5.dp,
+                    showTarget = true,
+                    compact = true
                 )
-                Text(
-                    text = "°C",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 3.dp, start = 2.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                // Target Chip
-                Box(
-                    modifier = Modifier
-                        .padding(bottom = 4.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(VxSurfaceSubtle)
-                        .padding(horizontal = 6.dp, vertical = 2.dp)
-                ) {
-                    Text(
-                        text = "Target ${data.targetTemp.toInt()}°C",
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             // Humidity Level & Mini Progress
             Row(
@@ -310,7 +272,7 @@ fun ChamberSensorCard(
                     Icon(
                         imageVector = Icons.Default.WaterDrop,
                         contentDescription = null,
-                        tint = VxPrimaryBlue,
+                        tint = VxTheme.primaryBlue,
                         modifier = Modifier.size(12.dp)
                     )
                     Spacer(modifier = Modifier.width(3.dp))
@@ -324,7 +286,7 @@ fun ChamberSensorCard(
                     text = "${data.humidity.toInt()}% RH",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
-                    color = VxPrimaryBlue
+                    color = VxTheme.primaryBlue
                 )
             }
 
@@ -336,7 +298,7 @@ fun ChamberSensorCard(
                     .height(4.dp)
                     .clip(RoundedCornerShape(2.dp)),
                 color = accentColor,
-                trackColor = VxSurfaceSubtle
+                trackColor = VxTheme.surfaceSubtle
             )
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -352,14 +314,14 @@ fun ChamberSensorCard(
                         modifier = Modifier
                             .size(6.dp)
                             .clip(CircleShape)
-                            .background(if (data.coolingActive) VxEmerald else VxTextMuted)
+                            .background(if (data.coolingActive) VxTheme.emerald else VxTheme.textMuted)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = if (data.coolingActive) "Cooling ON" else "Idle",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Medium,
-                        color = if (data.coolingActive) VxEmeraldDark else VxTextSecondary
+                        color = if (data.coolingActive) VxTheme.emeraldDark else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
@@ -401,13 +363,13 @@ fun OutsideSensorCard(
                     modifier = Modifier
                         .size(32.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(VxSurfaceSubtle),
+                        .background(VxTheme.surfaceSubtle),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.WbSunny,
                         contentDescription = null,
-                        tint = VxWarningAmber,
+                        tint = VxTheme.warningAmber,
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -420,25 +382,28 @@ fun OutsideSensorCard(
                 )
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
-            Row(verticalAlignment = Alignment.Bottom) {
-                Text(
-                    text = "$temperature",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = "°C",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 3.dp, start = 2.dp)
+            // Circular Arc Temperature Gauge for Outside Ambient
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                TemperatureGauge(
+                    temperature = temperature,
+                    minTemp = 0.0,
+                    maxTemp = 50.0,
+                    size = 100.dp,
+                    strokeWidth = 8.5.dp,
+                    showTarget = false,
+                    compact = true,
+                    accentColor = VxTheme.warningAmber
                 )
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -452,7 +417,7 @@ fun OutsideSensorCard(
                 Text(
                     text = "Heat Load: Moderate",
                     fontSize = 10.sp,
-                    color = VxWarningDark,
+                    color = VxTheme.warningDark,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -476,7 +441,7 @@ fun GasLevelSensorCard(
             .testTag("gas_sensor_card"),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, if (isNormal) VxBorderPurple else VxBorderWarning),
+        border = BorderStroke(1.dp, if (isNormal) VxTheme.borderPurple else VxTheme.borderWarning),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
@@ -489,13 +454,13 @@ fun GasLevelSensorCard(
                     modifier = Modifier
                         .size(32.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(VxSurfacePurple),
+                        .background(VxTheme.surfacePurple),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Eco,
                         contentDescription = null,
-                        tint = VxPurple,
+                        tint = VxTheme.purple,
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -514,7 +479,7 @@ fun GasLevelSensorCard(
                 text = gasLevel,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (isNormal) MaterialTheme.colorScheme.onSurface else VxWarningDark
+                color = if (isNormal) MaterialTheme.colorScheme.onSurface else VxTheme.warningDark
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -531,7 +496,7 @@ fun GasLevelSensorCard(
                 Text(
                     text = "Status: $airQuality",
                     fontSize = 10.sp,
-                    color = if (isNormal) VxEmeraldDark else VxWarningDark,
+                    color = if (isNormal) VxTheme.emeraldDark else VxTheme.warningDark,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -588,13 +553,13 @@ fun SolarPowerLiveCard(
                         modifier = Modifier
                             .size(36.dp)
                             .clip(RoundedCornerShape(10.dp))
-                            .background(VxSurfaceWarning),
+                            .background(VxTheme.surfaceWarning),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.WbSunny,
                             contentDescription = null,
-                            tint = VxWarningDark,
+                            tint = VxTheme.warningDark,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -618,7 +583,7 @@ fun SolarPowerLiveCard(
                     text = "Power Flow →",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
-                    color = VxPrimaryBlue
+                    color = VxTheme.primaryBlue
                 )
             }
 
@@ -634,8 +599,8 @@ fun SolarPowerLiveCard(
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(VxSurfaceWarning.copy(alpha = 0.5f))
-                        .border(1.dp, VxBorderWarning, RoundedCornerShape(12.dp))
+                        .background(VxTheme.surfaceWarning.copy(alpha = 0.5f))
+                        .border(1.dp, VxTheme.borderWarning, RoundedCornerShape(12.dp))
                         .padding(12.dp)
                 ) {
                     Column {
@@ -648,12 +613,12 @@ fun SolarPowerLiveCard(
                                 text = "Solar Input",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = VxWarningDark
+                                color = VxTheme.warningDark
                             )
                             Icon(
                                 imageVector = Icons.Default.ElectricBolt,
                                 contentDescription = null,
-                                tint = VxWarningAmber,
+                                tint = VxTheme.warningAmber,
                                 modifier = Modifier.size(14.dp)
                             )
                         }
@@ -669,7 +634,7 @@ fun SolarPowerLiveCard(
                                 text = " W",
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = VxWarningDark,
+                                color = VxTheme.warningDark,
                                 modifier = Modifier.padding(bottom = 2.dp)
                             )
                         }
@@ -687,8 +652,8 @@ fun SolarPowerLiveCard(
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(VxSurfaceGreen.copy(alpha = 0.5f))
-                        .border(1.dp, VxBorderGreen, RoundedCornerShape(12.dp))
+                        .background(VxTheme.surfaceGreen.copy(alpha = 0.5f))
+                        .border(1.dp, VxTheme.borderGreen, RoundedCornerShape(12.dp))
                         .padding(12.dp)
                 ) {
                     Column {
@@ -701,12 +666,12 @@ fun SolarPowerLiveCard(
                                 text = "Battery SOC",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = VxEmeraldDark
+                                color = VxTheme.emeraldDark
                             )
                             Icon(
                                 imageVector = Icons.Default.BatteryChargingFull,
                                 contentDescription = null,
-                                tint = VxEmeraldDark,
+                                tint = VxTheme.emeraldDark,
                                 modifier = Modifier.size(16.dp)
                             )
                         }
@@ -722,7 +687,7 @@ fun SolarPowerLiveCard(
                                 text = "%",
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = VxEmeraldDark,
+                                color = VxTheme.emeraldDark,
                                 modifier = Modifier.padding(bottom = 2.dp)
                             )
                         }
@@ -731,7 +696,7 @@ fun SolarPowerLiveCard(
                             text = "~14.5 hrs on backup",
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Medium,
-                            color = VxEmeraldDark
+                            color = VxTheme.emeraldDark
                         )
                     }
                 }
@@ -746,8 +711,8 @@ fun SolarPowerLiveCard(
                     .fillMaxWidth()
                     .height(6.dp)
                     .clip(RoundedCornerShape(3.dp)),
-                color = VxEmerald,
-                trackColor = VxSurfaceSubtle
+                color = VxTheme.emerald,
+                trackColor = VxTheme.surfaceSubtle
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -757,7 +722,7 @@ fun SolarPowerLiveCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(10.dp))
-                    .background(VxSurfaceSubtle)
+                    .background(VxTheme.surfaceSubtle)
                     .padding(horizontal = 12.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -780,7 +745,7 @@ fun SolarPowerLiveCard(
                 // Net Surplus
                 Column(horizontalAlignment = Alignment.End) {
                     Text(text = "Net Surplus", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(text = "+140 W", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = VxEmeraldDark)
+                    Text(text = "+140 W", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = VxTheme.emeraldDark)
                 }
             }
 
@@ -797,13 +762,13 @@ fun SolarPowerLiveCard(
                         modifier = Modifier
                             .size(7.dp)
                             .clip(CircleShape)
-                            .background(if (powerData.isCharging) VxEmerald else VxTextMuted)
+                            .background(if (powerData.isCharging) VxTheme.emerald else VxTheme.textMuted)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = if (powerData.isCharging) "Charging Active (MPPT Bulk)" else "Standby Mode",
                         fontSize = 11.sp,
-                        color = if (powerData.isCharging) VxEmeraldDark else VxTextSecondary,
+                        color = if (powerData.isCharging) VxTheme.emeraldDark else MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
@@ -813,7 +778,7 @@ fun SolarPowerLiveCard(
                         modifier = Modifier
                             .size(7.dp)
                             .clip(CircleShape)
-                            .background(if (powerData.gridConnected) VxEmerald else VxWarningAmber)
+                            .background(if (powerData.gridConnected) VxTheme.emerald else VxTheme.warningAmber)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
@@ -871,8 +836,8 @@ fun ChamberQuickControlsCard(
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(if (coolingActive) VxSurfaceBlue else VxSurfaceSubtle)
-                        .border(1.dp, if (coolingActive) VxBorderBlue else MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
+                        .background(if (coolingActive) VxTheme.surfaceBlue else VxTheme.surfaceSubtle)
+                        .border(1.dp, if (coolingActive) VxTheme.borderBlue else MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
                         .padding(12.dp)
                 ) {
                     Column {
@@ -884,7 +849,7 @@ fun ChamberQuickControlsCard(
                             Icon(
                                 imageVector = Icons.Default.AcUnit,
                                 contentDescription = null,
-                                tint = if (coolingActive) VxPrimaryBlue else VxTextMuted,
+                                tint = if (coolingActive) VxTheme.primaryBlue else VxTheme.textMuted,
                                 modifier = Modifier.size(20.dp)
                             )
                             Switch(
@@ -892,7 +857,7 @@ fun ChamberQuickControlsCard(
                                 onCheckedChange = onToggleCooling,
                                 colors = SwitchDefaults.colors(
                                     checkedThumbColor = Color.White,
-                                    checkedTrackColor = VxPrimaryBlue
+                                    checkedTrackColor = VxTheme.primaryBlue
                                 ),
                                 modifier = Modifier.testTag("dashboard_toggle_cooling")
                             )
@@ -907,7 +872,7 @@ fun ChamberQuickControlsCard(
                         Text(
                             text = if (coolingActive) "Compressors ON" else "Standby",
                             fontSize = 11.sp,
-                            color = if (coolingActive) VxPrimaryBlue else MaterialTheme.colorScheme.onSurfaceVariant
+                            color = if (coolingActive) VxTheme.primaryBlue else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -917,8 +882,8 @@ fun ChamberQuickControlsCard(
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(if (fansActive) VxSurfaceGreen else VxSurfaceSubtle)
-                        .border(1.dp, if (fansActive) VxBorderGreen else MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
+                        .background(if (fansActive) VxTheme.surfaceGreen else VxTheme.surfaceSubtle)
+                        .border(1.dp, if (fansActive) VxTheme.borderGreen else MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
                         .padding(12.dp)
                 ) {
                     Column {
@@ -930,7 +895,7 @@ fun ChamberQuickControlsCard(
                             Icon(
                                 imageVector = Icons.Default.Air,
                                 contentDescription = null,
-                                tint = if (fansActive) VxEmeraldDark else VxTextMuted,
+                                tint = if (fansActive) VxTheme.emeraldDark else VxTheme.textMuted,
                                 modifier = Modifier.size(20.dp)
                             )
                             Switch(
@@ -938,7 +903,7 @@ fun ChamberQuickControlsCard(
                                 onCheckedChange = onToggleFans,
                                 colors = SwitchDefaults.colors(
                                     checkedThumbColor = Color.White,
-                                    checkedTrackColor = VxEmerald
+                                    checkedTrackColor = VxTheme.emerald
                                 ),
                                 modifier = Modifier.testTag("dashboard_toggle_fans")
                             )
@@ -953,7 +918,7 @@ fun ChamberQuickControlsCard(
                         Text(
                             text = if (fansActive) "Ventilation Active" else "Stopped",
                             fontSize = 11.sp,
-                            color = if (fansActive) VxEmeraldDark else MaterialTheme.colorScheme.onSurfaceVariant
+                            color = if (fansActive) VxTheme.emeraldDark else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }

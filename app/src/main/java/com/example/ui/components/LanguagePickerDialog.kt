@@ -41,6 +41,7 @@ import com.example.ui.theme.VxSuccess
 import com.example.ui.theme.VxSurfaceBlue
 import com.example.ui.theme.VxTextPrimary
 import com.example.ui.theme.VxTextSecondary
+import com.example.ui.theme.VxTheme
 import com.example.util.IndianLanguage
 
 /**
@@ -57,7 +58,7 @@ fun LanguagePickerDialog(
         Card(
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            border = BorderStroke(1.dp, VxBorder),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp)
@@ -78,16 +79,16 @@ fun LanguagePickerDialog(
                             text = "🌐 भाषा चुनें / Select Language",
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Bold,
-                            color = VxTextPrimary
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
                             text = "भारतीय भाषाओं में अनुवाद और आवाज (Voice)",
                             fontSize = 11.sp,
-                            color = VxTextSecondary
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     IconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
-                        Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = VxTextSecondary)
+                        Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
 
@@ -107,8 +108,8 @@ fun LanguagePickerDialog(
                                 onDismiss()
                             },
                             shape = RoundedCornerShape(12.dp),
-                            color = if (isSelected) VxSurfaceBlue else Color.Transparent,
-                            border = BorderStroke(1.dp, if (isSelected) VxPrimaryBlue else VxBorder),
+                            color = if (isSelected) VxTheme.surfaceBlue else Color.Transparent,
+                            border = BorderStroke(1.dp, if (isSelected) VxTheme.primaryBlue else MaterialTheme.colorScheme.outline),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("select_lang_${lang.code}")
@@ -128,12 +129,12 @@ fun LanguagePickerDialog(
                                             text = lang.nativeName,
                                             fontSize = 15.sp,
                                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                            color = if (isSelected) VxPrimaryBlue else VxTextPrimary
+                                            color = if (isSelected) VxTheme.primaryBlue else MaterialTheme.colorScheme.onSurface
                                         )
                                         Text(
                                             text = lang.displayName,
                                             fontSize = 12.sp,
-                                            color = VxTextSecondary
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
                                 }
@@ -142,7 +143,7 @@ fun LanguagePickerDialog(
                                     Icon(
                                         imageVector = Icons.Default.Check,
                                         contentDescription = "Selected",
-                                        tint = VxPrimaryBlue,
+                                        tint = VxTheme.primaryBlue,
                                         modifier = Modifier.size(20.dp)
                                     )
                                 }

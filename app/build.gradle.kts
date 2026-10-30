@@ -20,6 +20,9 @@ android {
     versionName = "1.0"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    manifestPlaceholders["GOOGLE_MAPS_PLATFORM_KEY"] = "AIzaSy_GOOGLE_MAPS_DEMO_KEY_PLACEHOLDER"
+    manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = "AIzaSy_GOOGLE_MAPS_DEMO_KEY_PLACEHOLDER"
+    manifestPlaceholders["MAPS_API_KEY"] = "AIzaSy_GOOGLE_MAPS_DEMO_KEY_PLACEHOLDER"
   }
 
   signingConfigs {

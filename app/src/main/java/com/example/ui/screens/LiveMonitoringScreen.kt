@@ -59,20 +59,7 @@ import com.example.ui.components.ChamberSensorCard
 import com.example.ui.components.GasLevelSensorCard
 import com.example.ui.components.OutsideSensorCard
 import com.example.ui.components.VisionXHeader
-import com.example.ui.theme.VxBorder
-import com.example.ui.theme.VxBorderBlue
-import com.example.ui.theme.VxBorderGreen
-import com.example.ui.theme.VxCyanAccent
-import com.example.ui.theme.VxEmerald
-import com.example.ui.theme.VxEmeraldDark
-import com.example.ui.theme.VxNavy
-import com.example.ui.theme.VxPrimaryBlue
-import com.example.ui.theme.VxSurfaceBlue
-import com.example.ui.theme.VxSurfaceGreen
-import com.example.ui.theme.VxSurfaceSubtle
-import com.example.ui.theme.VxTextMuted
-import com.example.ui.theme.VxTextSecondary
-import com.example.ui.theme.VxWarningAmber
+import com.example.ui.theme.VxTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -156,7 +143,7 @@ fun LiveMonitoringScreen(
                                     .size(8.dp)
                                     .clip(CircleShape)
                                     .background(
-                                        if (deviceConnected) VxEmerald.copy(alpha = dotAlpha) else VxWarningAmber
+                                        if (deviceConnected) VxTheme.emerald.copy(alpha = dotAlpha) else VxTheme.warningAmber
                                     )
                             )
                             Spacer(modifier = Modifier.width(6.dp))
@@ -164,7 +151,7 @@ fun LiveMonitoringScreen(
                                 text = if (deviceConnected) "Raspberry Pi 5 Connected" else "Device Data Delayed",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (deviceConnected) VxEmeraldDark else VxWarningAmber
+                                color = if (deviceConnected) VxTheme.emeraldDark else VxTheme.warningAmber
                             )
                         }
 
@@ -183,7 +170,7 @@ fun LiveMonitoringScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(10.dp))
-                        .background(VxSurfaceSubtle)
+                        .background(VxTheme.surfaceSubtle)
                         .padding(3.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -192,7 +179,7 @@ fun LiveMonitoringScreen(
                         Surface(
                             onClick = { selectedChamberTab = tab },
                             shape = RoundedCornerShape(8.dp),
-                            color = if (isSelected) VxPrimaryBlue else Color.Transparent,
+                            color = if (isSelected) VxTheme.primaryBlue else Color.Transparent,
                             modifier = Modifier
                                 .weight(1f)
                                 .testTag("tab_live_$tab")
@@ -295,7 +282,7 @@ fun LiveMonitoringScreen(
                                 Text(
                                     text = if (coolingActive) "Compressors active" else "System idle",
                                     fontSize = 11.sp,
-                                    color = if (coolingActive) VxEmeraldDark else MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = if (coolingActive) VxTheme.emeraldDark else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             Switch(
@@ -303,7 +290,7 @@ fun LiveMonitoringScreen(
                                 onCheckedChange = { onToggleCooling(it) },
                                 colors = SwitchDefaults.colors(
                                     checkedThumbColor = Color.White,
-                                    checkedTrackColor = VxEmerald,
+                                    checkedTrackColor = VxTheme.emerald,
                                     uncheckedThumbColor = Color.White,
                                     uncheckedTrackColor = MaterialTheme.colorScheme.outline
                                 ),
@@ -329,7 +316,7 @@ fun LiveMonitoringScreen(
                                 Text(
                                     text = if (fansActive) "Chamber ventilation running" else "Fans stopped",
                                     fontSize = 11.sp,
-                                    color = if (fansActive) VxEmeraldDark else MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = if (fansActive) VxTheme.emeraldDark else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             Switch(
@@ -337,7 +324,7 @@ fun LiveMonitoringScreen(
                                 onCheckedChange = { onToggleFans(it) },
                                 colors = SwitchDefaults.colors(
                                     checkedThumbColor = Color.White,
-                                    checkedTrackColor = VxEmerald,
+                                    checkedTrackColor = VxTheme.emerald,
                                     uncheckedThumbColor = Color.White,
                                     uncheckedTrackColor = MaterialTheme.colorScheme.outline
                                 ),
@@ -352,7 +339,7 @@ fun LiveMonitoringScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(VxSurfaceSubtle)
+                                .background(VxTheme.surfaceSubtle)
                                 .padding(12.dp),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
@@ -380,7 +367,7 @@ fun LiveMonitoringScreen(
                                     text = "${powerData.solarInputWatts.toInt()} W",
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = VxEmeraldDark
+                                    color = VxTheme.emeraldDark
                                 )
                             }
 
@@ -394,7 +381,7 @@ fun LiveMonitoringScreen(
                                     text = "MPPT Active",
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = VxPrimaryBlue
+                                    color = VxTheme.primaryBlue
                                 )
                             }
                         }
@@ -431,7 +418,7 @@ fun LiveMonitoringScreen(
                                 Icon(
                                     imageVector = Icons.Default.Sensors,
                                     contentDescription = null,
-                                    tint = VxPrimaryBlue,
+                                    tint = VxTheme.primaryBlue,
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
@@ -439,7 +426,7 @@ fun LiveMonitoringScreen(
                                     text = "6/6 OK",
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = VxEmeraldDark
+                                    color = VxTheme.emeraldDark
                                 )
                             }
                         }
@@ -459,7 +446,7 @@ fun LiveMonitoringScreen(
                                         modifier = Modifier
                                             .weight(1f)
                                             .clip(RoundedCornerShape(8.dp))
-                                            .background(VxSurfaceSubtle)
+                                            .background(VxTheme.surfaceSubtle)
                                             .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
                                             .padding(horizontal = 10.dp, vertical = 8.dp)
                                     ) {
@@ -484,14 +471,14 @@ fun LiveMonitoringScreen(
                                             Box(
                                                 modifier = Modifier
                                                     .clip(RoundedCornerShape(4.dp))
-                                                    .background(VxSurfaceGreen)
+                                                    .background(VxTheme.surfaceGreen)
                                                     .padding(horizontal = 6.dp, vertical = 2.dp)
                                             ) {
                                                 Text(
                                                     text = "OK",
                                                     fontSize = 10.sp,
                                                     fontWeight = FontWeight.Bold,
-                                                    color = VxEmeraldDark
+                                                    color = VxTheme.emeraldDark
                                                 )
                                             }
                                         }

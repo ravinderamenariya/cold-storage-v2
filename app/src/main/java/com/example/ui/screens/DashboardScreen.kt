@@ -51,10 +51,7 @@ import com.example.ui.components.CrateCard
 import com.example.ui.components.FarmerDashboardCard
 import com.example.ui.components.LanguagePickerDialog
 import com.example.ui.components.VisionXHeader
-import com.example.ui.theme.VxPrimaryBlue
-import com.example.ui.theme.VxSurfaceBlue
-import com.example.ui.theme.VxTextPrimary
-import com.example.ui.theme.VxTextSecondary
+import com.example.ui.theme.VxTheme
 import com.example.util.AppTranslations
 import com.example.util.IndianLanguage
 import com.example.util.UserLocationInfo
@@ -144,8 +141,8 @@ fun DashboardScreen(
                     Surface(
                         onClick = onOpenLocationSheet,
                         shape = RoundedCornerShape(14.dp),
-                        color = VxSurfaceBlue,
-                        border = BorderStroke(1.dp, VxPrimaryBlue.copy(alpha = 0.4f)),
+                        color = VxTheme.surfaceBlue,
+                        border = BorderStroke(1.dp, VxTheme.borderBlue),
                         modifier = Modifier
                             .fillMaxWidth()
                             .testTag("dashboard_location_banner")
@@ -161,7 +158,7 @@ fun DashboardScreen(
                                 Icon(
                                     imageVector = Icons.Default.LocationOn,
                                     contentDescription = "Location",
-                                    tint = VxPrimaryBlue,
+                                    tint = VxTheme.primaryBlue,
                                     modifier = Modifier.size(22.dp)
                                 )
                                 Spacer(modifier = Modifier.width(10.dp))
@@ -170,18 +167,18 @@ fun DashboardScreen(
                                         text = "📍 ${currentLocation.cityName}, ${currentLocation.stateName}",
                                         fontSize = 14.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = VxTextPrimary
+                                        color = VxTheme.textPrimary
                                     )
                                     Text(
                                         text = "मंडी: ${currentLocation.nearestMandi}",
                                         fontSize = 11.sp,
-                                        color = VxTextSecondary
+                                        color = VxTheme.textSecondary
                                     )
                                 }
                             }
                             Surface(
                                 shape = RoundedCornerShape(8.dp),
-                                color = VxPrimaryBlue,
+                                color = VxTheme.primaryBlue,
                                 modifier = Modifier.padding(start = 8.dp)
                             ) {
                                 Text(
@@ -243,7 +240,7 @@ fun DashboardScreen(
                             text = AppTranslations.get("nav_crates", selectedLanguage),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
-                            color = VxTextPrimary
+                            color = VxTheme.textPrimary
                         )
                         TextButton(
                             onClick = { onNavigate(AppDestination.CRATES) },
@@ -251,7 +248,7 @@ fun DashboardScreen(
                         ) {
                             Text(
                                 text = "सभी देखें (View All)",
-                                color = VxPrimaryBlue,
+                                color = VxTheme.primaryBlue,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 13.sp
                             )
@@ -280,7 +277,7 @@ fun DashboardScreen(
                             text = AppTranslations.get("nav_alerts", selectedLanguage),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
-                            color = VxTextPrimary
+                            color = VxTheme.textPrimary
                         )
                         TextButton(
                             onClick = { onNavigate(AppDestination.ALERTS) },
@@ -288,7 +285,7 @@ fun DashboardScreen(
                         ) {
                             Text(
                                 text = "सभी देखें (View All)",
-                                color = VxPrimaryBlue,
+                                color = VxTheme.primaryBlue,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 13.sp
                             )

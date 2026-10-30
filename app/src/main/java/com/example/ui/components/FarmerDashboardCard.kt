@@ -52,6 +52,7 @@ import com.example.ui.theme.VxSurfaceWarning
 import com.example.ui.theme.VxTextPrimary
 import com.example.ui.theme.VxTextSecondary
 import com.example.ui.theme.VxWarningAmber
+import com.example.ui.theme.VxTheme
 import com.example.util.AppTranslations
 import com.example.util.IndianLanguage
 
@@ -82,8 +83,8 @@ fun FarmerDashboardCard(
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = VxSurfaceCard),
-        border = BorderStroke(1.dp, VxBorder),
+        colors = CardDefaults.cardColors(containerColor = VxTheme.surfaceSubtle),
+        border = BorderStroke(1.dp, VxTheme.border),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = modifier
             .fillMaxWidth()
@@ -103,8 +104,8 @@ fun FarmerDashboardCard(
                 // Status Pill
                 Surface(
                     shape = RoundedCornerShape(20.dp),
-                    color = if (isAllSafe) VxSurfaceGreen else VxSurfaceWarning,
-                    border = BorderStroke(1.dp, if (isAllSafe) VxBorderGreen else VxBorderWarning)
+                    color = if (isAllSafe) VxTheme.surfaceGreen else VxTheme.surfaceWarning,
+                    border = BorderStroke(1.dp, if (isAllSafe) VxTheme.borderGreen else VxTheme.borderWarning)
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -114,14 +115,14 @@ fun FarmerDashboardCard(
                             modifier = Modifier
                                 .size(8.dp)
                                 .clip(CircleShape)
-                                .background(if (isAllSafe) VxSuccess else VxWarningAmber)
+                                .background(if (isAllSafe) VxTheme.success else VxTheme.warningAmber)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = if (isAllSafe) AppTranslations.get("everything_safe", selectedLanguage) else AppTranslations.get("attention_required", selectedLanguage),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = if (isAllSafe) VxSuccess else VxWarningAmber
+                            color = if (isAllSafe) VxTheme.success else VxTheme.warningAmber
                         )
                     }
                 }
@@ -132,13 +133,13 @@ fun FarmerDashboardCard(
                     modifier = Modifier
                         .size(38.dp)
                         .clip(CircleShape)
-                        .background(VxSurfaceSubtle)
+                        .background(VxTheme.surfaceSubtle)
                         .testTag("farmer_listen_status_button")
                 ) {
                     Icon(
                         imageVector = Icons.Default.VolumeUp,
                         contentDescription = "Listen Aloud",
-                        tint = VxPrimaryBlue,
+                        tint = VxTheme.primaryBlue,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -146,34 +147,69 @@ fun FarmerDashboardCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 2. Four Clean Minimal Metric Tiles (2x2 Grid)
+            // 2. Circular Temperature Gauges for Chambers
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Chamber 1 Tile
-                MetricTile(
-                    label = AppTranslations.get("chamber_1", selectedLanguage),
-                    value = "${c1Temp}°C",
-                    subtext = "सब्जी कमरा",
-                    isGood = c1Temp in 8.0..16.0,
-                    onClick = {
-                        onSpeakCard("कमरा 1 का तापमान $c1Temp डिग्री है। सब ठीक है।")
-                    },
+                Surface(
+                    onClick = { onSpeakCard("कमरा 1 का तापमान $c1Temp डिग्री है। लक्ष्य 12 डिग्री।") },
+                    shape = RoundedCornerShape(14.dp),
+                    color = VxTheme.surfaceSubtle,
+                    border = BorderStroke(1.dp, VxTheme.border),
                     modifier = Modifier.weight(1f)
-                )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        TemperatureGauge(
+                            title = AppTranslations.get("chamber_1", selectedLanguage),
+                            temperature = c1Temp,
+                            targetTemp = 12.0,
+                            size = 110.dp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "सब्जी कमरा",
+                            fontSize = 11.sp,
+                            color = VxTheme.textSecondary
+                        )
+                    }
+                }
 
-                // Chamber 2 Tile
-                MetricTile(
-                    label = AppTranslations.get("chamber_2", selectedLanguage),
-                    value = "${c2Temp}°C",
-                    subtext = "फल व अन्य",
-                    isGood = c2Temp in -2.0..8.0,
-                    onClick = {
-                        onSpeakCard("कमरा 2 का तापमान $c2Temp डिग्री है। ठंडक सही है।")
-                    },
+                Spacer(modifier = Modifier.width(10.dp))
+
+                Surface(
+                    onClick = { onSpeakCard("कमरा 2 का तापमान $c2Temp डिग्री है। लक्ष्य 4 डिग्री।") },
+                    shape = RoundedCornerShape(14.dp),
+                    color = VxTheme.surfaceSubtle,
+                    border = BorderStroke(1.dp, VxTheme.border),
                     modifier = Modifier.weight(1f)
-                )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        TemperatureGauge(
+                            title = AppTranslations.get("chamber_2", selectedLanguage),
+                            temperature = c2Temp,
+                            targetTemp = 4.0,
+                            size = 110.dp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "फल व अन्य",
+                            fontSize = 11.sp,
+                            color = VxTheme.textSecondary
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -218,8 +254,8 @@ fun FarmerDashboardCard(
                 Surface(
                     onClick = { onToggleCooling(!coolingActive) },
                     shape = RoundedCornerShape(12.dp),
-                    color = if (coolingActive) VxSurfaceGreen else VxSurfaceSubtle,
-                    border = BorderStroke(1.dp, if (coolingActive) VxBorderGreen else VxBorder),
+                    color = if (coolingActive) VxTheme.surfaceGreen else VxTheme.surfaceSubtle,
+                    border = BorderStroke(1.dp, if (coolingActive) VxTheme.borderGreen else VxTheme.border),
                     modifier = Modifier
                         .weight(1f)
                         .height(52.dp)
@@ -239,18 +275,18 @@ fun FarmerDashboardCard(
                                 text = "ठंडक (AC)",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = VxTextPrimary
+                                color = VxTheme.textPrimary
                             )
                         }
                         Surface(
                             shape = RoundedCornerShape(6.dp),
-                            color = if (coolingActive) VxSuccess else VxSurfaceSubtle
+                            color = if (coolingActive) VxTheme.success else VxTheme.surfaceSubtle
                         ) {
                             Text(
                                 text = if (coolingActive) "चालू ON" else "बंद OFF",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (coolingActive) Color.White else VxTextSecondary,
+                                color = if (coolingActive) Color.White else VxTheme.textSecondary,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
                         }
@@ -261,8 +297,8 @@ fun FarmerDashboardCard(
                 Surface(
                     onClick = { onToggleFans(!fansActive) },
                     shape = RoundedCornerShape(12.dp),
-                    color = if (fansActive) VxSurfaceGreen else VxSurfaceSubtle,
-                    border = BorderStroke(1.dp, if (fansActive) VxBorderGreen else VxBorder),
+                    color = if (fansActive) VxTheme.surfaceGreen else VxTheme.surfaceSubtle,
+                    border = BorderStroke(1.dp, if (fansActive) VxTheme.borderGreen else VxTheme.border),
                     modifier = Modifier
                         .weight(1f)
                         .height(52.dp)
@@ -282,18 +318,18 @@ fun FarmerDashboardCard(
                                 text = "पंखा (Fan)",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = VxTextPrimary
+                                color = VxTheme.textPrimary
                             )
                         }
                         Surface(
                             shape = RoundedCornerShape(6.dp),
-                            color = if (fansActive) VxSuccess else VxSurfaceSubtle
+                            color = if (fansActive) VxTheme.success else VxTheme.surfaceSubtle
                         ) {
                             Text(
                                 text = if (fansActive) "चालू ON" else "बंद OFF",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (fansActive) Color.White else VxTextSecondary,
+                                color = if (fansActive) Color.White else VxTheme.textSecondary,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
                         }
@@ -308,7 +344,7 @@ fun FarmerDashboardCard(
                 onClick = onOpenVoiceAssistant,
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = VxPrimaryBlue,
+                    containerColor = VxTheme.primaryBlue,
                     contentColor = Color.White
                 ),
                 modifier = Modifier
@@ -344,8 +380,8 @@ private fun MetricTile(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
-        color = VxSurfaceSubtle,
-        border = BorderStroke(1.dp, VxBorder),
+        color = VxTheme.surfaceSubtle,
+        border = BorderStroke(1.dp, VxTheme.border),
         modifier = modifier
     ) {
         Column(
@@ -362,14 +398,14 @@ private fun MetricTile(
                     text = label,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
-                    color = VxTextSecondary,
+                    color = VxTheme.textSecondary,
                     maxLines = 1
                 )
                 Box(
                     modifier = Modifier
                         .size(6.dp)
                         .clip(CircleShape)
-                        .background(if (isGood) VxSuccess else VxWarningAmber)
+                        .background(if (isGood) VxTheme.success else VxTheme.warningAmber)
                 )
             }
             Spacer(modifier = Modifier.height(4.dp))
@@ -377,13 +413,13 @@ private fun MetricTile(
                 text = value,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = VxTextPrimary
+                color = VxTheme.textPrimary
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = subtext,
                 fontSize = 11.sp,
-                color = VxTextSecondary,
+                color = VxTheme.textSecondary,
                 maxLines = 1
             )
         }
