@@ -52,6 +52,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -79,6 +80,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.example.ui.AiChatMessage
 import com.example.ui.components.VisionXHeader
 import com.example.ui.theme.VxTheme
 import com.example.util.AppTranslations
@@ -90,6 +92,8 @@ fun VoiceAssistantScreen(
     selectedLanguage: IndianLanguage,
     isSpeaking: Boolean,
     lastSpokenText: String,
+    chatMessages: List<AiChatMessage> = emptyList(),
+    isAiThinking: Boolean = false,
     onSelectLanguage: (IndianLanguage) -> Unit,
     onSpeakCurrentStatus: () -> Unit,
     onAskFarmerQuestion: (FarmerQuestionType) -> Unit,
@@ -143,6 +147,12 @@ fun VoiceAssistantScreen(
 
             override fun onError(error: Int) {
                 isListening = false
+                speechError = when (error) {
+                    SpeechRecognizer.ERROR_NO_MATCH -> "No speech recognized. Please try again."
+                    SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Network issue in voice recognition."
+                    SpeechRecognizer.ERROR_AUDIO -> "Audio recording error."
+                    else -> "Voice recognition error (code $error)."
+                }
             }
 
             override fun onResults(results: Bundle?) {
@@ -159,27 +169,43 @@ fun VoiceAssistantScreen(
             override fun onEvent(eventType: Int, params: Bundle?) {}
         })
 
-        speechRecognizer.startListening(intent)
+        try {
+            speechRecognizer.startListening(intent)
+        } catch (e: Exception) {
+            isListening = false
+            speechError = "Could not start voice recognition: ${e.message}"
+        }
     }
 
-    // Permission launcher for RECORD_AUDIO
+    fun stopListening() {
+        try {
+            speechRecognizer?.stopListening()
+        } catch (_: Exception) {}
+        isListening = false
+    }
+
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
             startListening()
         } else {
-            speechError = "Microphone permission is required to speak."
+            speechError = "Audio permission is required to use the voice microphone."
         }
     }
 
     fun handleMicClick() {
         if (isListening) {
-            speechRecognizer?.stopListening()
-            isListening = false
+            stopListening()
+        } else if (isSpeaking) {
+            onStopSpeaking()
         } else {
-            val permissionCheck = ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
-            if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            val hasPermission = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.RECORD_AUDIO
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (hasPermission) {
                 startListening()
             } else {
                 permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
@@ -187,34 +213,31 @@ fun VoiceAssistantScreen(
         }
     }
 
-    // Infinite breathing animation for pulsing mic button
-    val infiniteTransition = rememberInfiniteTransition(label = "mic_pulse")
+    // Pulsing Animation when Listening or Speaking
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val pulseScale by infiniteTransition.animateFloat(
-        initialValue = 1.0f,
-        targetValue = if (isListening || isSpeaking) 1.15f else 1.0f,
+        initialValue = 1f,
+        targetValue = 1.14f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 800, easing = FastOutSlowInEasing),
+            animation = tween(800, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "scale"
+        label = "pulseScale"
     )
 
     Scaffold(
         topBar = {
             VisionXHeader(
-                title = AppTranslations.get("nav_voice", selectedLanguage),
-                subtitle = "Multilingual Kisan Voice Assistant",
+                title = "GREENCOLD Kisan AI",
+                subtitle = "Gemini 3.8 Flash • Voice & Return Advisory",
                 showBack = true,
-                onBackClick = onBack,
-                language = selectedLanguage,
-                onSpeakStatusClick = onSpeakCurrentStatus
+                onBackClick = onBack
             )
         },
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        modifier = modifier.fillMaxSize()
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { innerPadding ->
         BoxWithConstraints(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
@@ -223,50 +246,55 @@ fun VoiceAssistantScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 16.dp),
-                contentPadding = PaddingValues(top = 12.dp, bottom = 40.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+                contentPadding = PaddingValues(top = 12.dp, bottom = 28.dp)
             ) {
-                // 1. Language Switcher Row (All Indian Languages)
+                // 1. Language Selector Row
                 item {
-                    Text(
-                        text = "🌐 ${AppTranslations.get("language", selectedLanguage)} / Select Language",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        items(IndianLanguage.values()) { lang ->
-                            val isSelected = lang == selectedLanguage
-                            Surface(
-                                onClick = { onSelectLanguage(lang) },
-                                shape = RoundedCornerShape(20.dp),
-                                color = if (isSelected) VxTheme.primaryBlue else MaterialTheme.colorScheme.surface,
-                                border = BorderStroke(1.dp, if (isSelected) VxTheme.primaryBlue else MaterialTheme.colorScheme.outline),
-                                modifier = Modifier.testTag("lang_chip_${lang.code}")
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                    Column {
+                        Text(
+                            text = "🌐 भाषा चुनें (Select Voice Language):",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = PaddingValues(horizontal = 2.dp)
+                        ) {
+                            items(IndianLanguage.values()) { lang ->
+                                val isSelected = lang == selectedLanguage
+                                Surface(
+                                    onClick = { onSelectLanguage(lang) },
+                                    shape = RoundedCornerShape(20.dp),
+                                    color = if (isSelected) VxTheme.primaryBlue else MaterialTheme.colorScheme.surface,
+                                    border = BorderStroke(
+                                        width = if (isSelected) 2.dp else 1.dp,
+                                        color = if (isSelected) VxTheme.primaryBlue else MaterialTheme.colorScheme.outline
+                                    ),
+                                    modifier = Modifier.testTag("lang_chip_${lang.code}")
                                 ) {
-                                    Text(text = lang.flagEmoji, fontSize = 14.sp)
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(
-                                        text = lang.nativeName,
-                                        fontSize = 13.sp,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                        color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface
-                                    )
-                                    if (lang != IndianLanguage.ENGLISH && lang != IndianLanguage.HINDI) {
-                                        Spacer(modifier = Modifier.width(4.dp))
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(text = lang.flagEmoji, fontSize = 14.sp)
+                                        Spacer(modifier = Modifier.width(6.dp))
                                         Text(
-                                            text = "(${lang.displayName})",
-                                            fontSize = 10.sp,
-                                            color = if (isSelected) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
+                                            text = lang.nativeName,
+                                            fontSize = 13.sp,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface
                                         )
+                                        if (lang != IndianLanguage.ENGLISH && lang != IndianLanguage.HINDI) {
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text(
+                                                text = "(${lang.displayName})",
+                                                fontSize = 10.sp,
+                                                color = if (isSelected) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -280,7 +308,7 @@ fun VoiceAssistantScreen(
                         shape = RoundedCornerShape(20.dp),
                         color = VxTheme.purple.copy(alpha = 0.12f),
                         border = BorderStroke(1.dp, VxTheme.purple.copy(alpha = 0.35f)),
-                        modifier = Modifier.padding(vertical = 4.dp)
+                        modifier = Modifier.padding(vertical = 2.dp)
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
@@ -294,7 +322,7 @@ fun VoiceAssistantScreen(
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "Powered by Gemini 3.8 Flash AI",
+                                text = "Connected to Gemini 3.8 Flash AI Model",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = VxTheme.purple
@@ -319,14 +347,14 @@ fun VoiceAssistantScreen(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(24.dp),
+                                .padding(20.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             // Pulsing Big Mic Circle
                             Box(
                                 contentAlignment = Alignment.Center,
                                 modifier = Modifier
-                                    .size(96.dp)
+                                    .size(92.dp)
                                     .scale(if (isListening || isSpeaking) pulseScale else 1f)
                                     .clip(CircleShape)
                                     .background(
@@ -344,11 +372,11 @@ fun VoiceAssistantScreen(
                                     imageVector = if (isSpeaking) Icons.Default.VolumeUp else Icons.Default.Mic,
                                     contentDescription = "Microphone",
                                     tint = Color.White,
-                                    modifier = Modifier.size(46.dp)
+                                    modifier = Modifier.size(44.dp)
                                 )
                             }
 
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(14.dp))
 
                             Text(
                                 text = when {
@@ -356,14 +384,14 @@ fun VoiceAssistantScreen(
                                     isSpeaking -> AppTranslations.get("speaking", selectedLanguage)
                                     else -> AppTranslations.get("tap_to_speak", selectedLanguage)
                                 },
-                                fontSize = 18.sp,
+                                fontSize = 17.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = if (isSpeaking) VxTheme.success else MaterialTheme.colorScheme.onSurface,
                                 textAlign = TextAlign.Center
                             )
 
                             Text(
-                                text = "इस डिवाइस, कोल्ड स्टोरेज तापमान या फसल के बारे में कुछ भी पूछें",
+                                text = "कोल्ड स्टोरेज, क्या-अगर सवाल या फसल रिटर्न के बारे में सीधे पूछें",
                                 fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center,
@@ -374,7 +402,7 @@ fun VoiceAssistantScreen(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(top = 16.dp),
+                                    .padding(top = 14.dp),
                                 horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
                                 Button(
@@ -413,48 +441,169 @@ fun VoiceAssistantScreen(
                     }
                 }
 
-                // 3. Spoken Text Transcription Card (Shows exactly what device said)
-                if (lastSpokenText.isNotBlank()) {
-                    item {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = VxTheme.surfaceGreen),
-                            border = BorderStroke(1.dp, VxTheme.borderGreen)
+                // 3. What-If & Return Quick Prompt Chips
+                item {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = "💡 क्या-अगर सवाल (Ask What-If & Return Scenarios):",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = PaddingValues(horizontal = 2.dp)
                         ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.VolumeUp,
-                                        contentDescription = null,
-                                        tint = VxTheme.success,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
+                            val whatIfPrompts = listOf(
+                                "अगर 5 दिन बाद बेचें तो क्या return मिलेगा?",
+                                "कमरा 1 का तापमान 8°C करने पर क्या होगा?",
+                                "आलू को कब बेचना सबसे फायदेमंद रहेगा?",
+                                "सोलर पावर कम होने पर कूलिंग कितनी देर चलेगी?"
+                            )
+                            items(whatIfPrompts) { prompt ->
+                                Surface(
+                                    onClick = { onAskVoiceQuery(prompt) },
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = VxTheme.surfaceBlue,
+                                    border = BorderStroke(1.dp, VxTheme.primaryBlue.copy(alpha = 0.35f))
+                                ) {
                                     Text(
-                                        text = "डिवाइस का जवाब (Voice Response):",
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 13.sp,
-                                        color = VxTheme.success
+                                        text = prompt,
+                                        fontSize = 12.sp,
+                                        color = VxTheme.primaryBlue,
+                                        fontWeight = FontWeight.Medium,
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
                                     )
                                 }
-                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                        }
+                    }
+                }
+
+                // 4. Live Conversational Chat Feed with Gemini 3.8 Flash
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "💬 किसान संवाद (Gemini AI Chat):",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = VxTheme.purple.copy(alpha = 0.12f)
+                        ) {
+                            Text(
+                                text = "Gemini Active",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = VxTheme.purple,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                            )
+                        }
+                    }
+                }
+
+                items(chatMessages, key = { it.id }) { msg ->
+                    if (msg.isUser) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 4.dp, bottomStart = 16.dp, bottomEnd = 16.dp),
+                                color = VxTheme.primaryBlue,
+                                modifier = Modifier.fillMaxWidth(0.85f)
+                            ) {
                                 Text(
-                                    text = lastSpokenText,
-                                    fontSize = 14.sp,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    lineHeight = 20.sp
+                                    text = msg.text,
+                                    color = Color.White,
+                                    fontSize = 13.sp,
+                                    lineHeight = 18.sp,
+                                    modifier = Modifier.padding(12.dp)
+                                )
+                            }
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Start
+                        ) {
+                            Card(
+                                shape = RoundedCornerShape(topStart = 4.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 16.dp),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                border = BorderStroke(1.dp, VxTheme.purple.copy(alpha = 0.35f)),
+                                modifier = Modifier.fillMaxWidth(0.92f)
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.AutoAwesome,
+                                            contentDescription = null,
+                                            tint = VxTheme.purple,
+                                            modifier = Modifier.size(15.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = "GREENCOLD Kisan AI (Gemini 3.8 Flash)",
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = VxTheme.purple
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = msg.text,
+                                        fontSize = 13.sp,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        lineHeight = 19.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Gemini Thinking Indicator
+                if (isAiThinking) {
+                    item {
+                        Card(
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = VxTheme.surfaceBlue),
+                            border = BorderStroke(1.dp, VxTheme.primaryBlue.copy(alpha = 0.4f)),
+                            modifier = Modifier.fillMaxWidth(0.88f)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(18.dp),
+                                    strokeWidth = 2.dp,
+                                    color = VxTheme.primaryBlue
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(
+                                    text = "Gemini 3.8 Flash विश्लेषण कर रहा है... (Calculating return & advice)",
+                                    fontSize = 12.sp,
+                                    color = VxTheme.primaryBlue,
+                                    fontWeight = FontWeight.Medium
                                 )
                             }
                         }
                     }
                 }
 
-                // 4. One-Tap Quick Questions for Farmers / Illiterate Users
+                // 5. One-Tap Quick Questions for Farmers / Illiterate Users
                 item {
                     Text(
                         text = "⚡ ${AppTranslations.get("quick_questions", selectedLanguage)}",
-                        fontSize = 15.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -473,7 +622,7 @@ fun VoiceAssistantScreen(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(14.dp),
+                                .padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
@@ -481,12 +630,12 @@ fun VoiceAssistantScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Text(text = qType.iconEmoji, fontSize = 24.sp)
+                                Text(text = qType.iconEmoji, fontSize = 22.sp)
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column {
                                     Text(
                                         text = qType.hindiTitle,
-                                        fontSize = 14.sp,
+                                        fontSize = 13.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
@@ -499,7 +648,7 @@ fun VoiceAssistantScreen(
                             }
                             Box(
                                 modifier = Modifier
-                                    .size(36.dp)
+                                    .size(32.dp)
                                     .clip(CircleShape)
                                     .background(VxTheme.surfaceBlue),
                                 contentAlignment = Alignment.Center
@@ -508,18 +657,18 @@ fun VoiceAssistantScreen(
                                     imageVector = Icons.Default.VolumeUp,
                                     contentDescription = "Speak answer",
                                     tint = VxTheme.primaryBlue,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(16.dp)
                                 )
                             }
                         }
                     }
                 }
 
-                // 5. Type query input (for writing query)
+                // 6. Type Query Input Box
                 item {
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "✍️ लिखकर पूछें (Type question)",
+                        text = "✍️ लिखकर पूछें (Type question directly to Gemini)",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -532,7 +681,7 @@ fun VoiceAssistantScreen(
                         OutlinedTextField(
                             value = queryText,
                             onValueChange = { queryText = it },
-                            placeholder = { Text("जैसे: क्या कमरा 1 ठंडा है?", fontSize = 13.sp) },
+                            placeholder = { Text("जैसे: अगर 5 दिन बाद बेचें तो क्या return मिलेगा?", fontSize = 12.sp) },
                             singleLine = true,
                             shape = RoundedCornerShape(10.dp),
                             colors = OutlinedTextFieldDefaults.colors(
@@ -544,6 +693,7 @@ fun VoiceAssistantScreen(
                                 onSend = {
                                     if (queryText.isNotBlank()) {
                                         onAskVoiceQuery(queryText)
+                                        queryText = ""
                                     }
                                 }
                             ),
@@ -556,6 +706,7 @@ fun VoiceAssistantScreen(
                             onClick = {
                                 if (queryText.isNotBlank()) {
                                     onAskVoiceQuery(queryText)
+                                    queryText = ""
                                 }
                             },
                             modifier = Modifier

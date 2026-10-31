@@ -127,6 +127,8 @@ fun AppNavigation(
     val lastSpokenText by viewModel.lastSpokenText.collectAsState()
     val isFarmerMode by viewModel.isFarmerMode.collectAsState()
     val currentLocation by viewModel.currentLocation.collectAsState()
+    val chatMessages by viewModel.chatMessages.collectAsState()
+    val isAiThinking by viewModel.isAiThinking.collectAsState()
 
     var showMoreSheet by remember { mutableStateOf(false) }
     var showLocationSheet by remember { mutableStateOf(false) }
@@ -220,7 +222,8 @@ fun AppNavigation(
                         onSpeakText = { viewModel.speakText(it) },
                         onOpenVoiceAssistant = { viewModel.navigateTo(AppDestination.VOICE_ASSISTANT) },
                         currentLocation = currentLocation,
-                        onOpenLocationSheet = { showLocationSheet = true }
+                        onOpenLocationSheet = { showLocationSheet = true },
+                        onCheckWeatherConnection = { viewModel.checkWeatherConnection() }
                     )
                 }
 
@@ -229,6 +232,8 @@ fun AppNavigation(
                         selectedLanguage = selectedLanguage,
                         isSpeaking = isSpeaking,
                         lastSpokenText = lastSpokenText,
+                        chatMessages = chatMessages,
+                        isAiThinking = isAiThinking,
                         onSelectLanguage = { viewModel.setLanguage(it) },
                         onSpeakCurrentStatus = { viewModel.speakCurrentStatus() },
                         onAskFarmerQuestion = { viewModel.askFarmerQuestion(it) },

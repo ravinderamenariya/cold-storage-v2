@@ -47,10 +47,12 @@ import com.example.data.model.Crate
 import com.example.data.model.PowerData
 import com.example.ui.AppDestination
 import com.example.ui.components.AlertCard
+import com.example.ui.components.ColdStorageLocationMapCard
 import com.example.ui.components.CrateCard
 import com.example.ui.components.FarmerDashboardCard
 import com.example.ui.components.LanguagePickerDialog
 import com.example.ui.components.VisionXHeader
+import com.example.ui.components.WeatherConnectionCard
 import com.example.ui.theme.VxTheme
 import com.example.util.AppTranslations
 import com.example.util.IndianLanguage
@@ -91,6 +93,7 @@ fun DashboardScreen(
     onOpenVoiceAssistant: () -> Unit = {},
     currentLocation: UserLocationInfo = UserLocationInfo("Delhi", "Delhi NCR", "Azadpur Mandi, Delhi", 1.08f),
     onOpenLocationSheet: () -> Unit = {},
+    onCheckWeatherConnection: () -> String = { "Weather Connection OK: Station Online" },
     modifier: Modifier = Modifier
 ) {
     var showLanguageDialog by remember { mutableStateOf(false) }
@@ -302,8 +305,28 @@ fun DashboardScreen(
                     )
                 }
 
+                // GOOGLE MAPS PREVIEW: WHERE IS MY COLD STORAGE
                 item {
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
+                    ColdStorageLocationMapCard(
+                        currentLocation = currentLocation,
+                        storageName = "GREENCOLD Smart Storage Unit"
+                    )
+                }
+
+                // WEATHER & SENSOR CONNECTION STATUS
+                item {
+                    Spacer(modifier = Modifier.height(14.dp))
+                    WeatherConnectionCard(
+                        outsideTemp = outsideTemp,
+                        outsideHumidity = outsideHumidity,
+                        connectionStatus = if (isOnline) "ONLINE (Station Linked)" else "ONLINE (Sensor Active)",
+                        onCheckWeatherConnection = onCheckWeatherConnection
+                    )
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
         }

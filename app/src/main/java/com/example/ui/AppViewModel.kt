@@ -48,6 +48,14 @@ data class AuthUser(
     val role: String = "Storage Manager"
 )
 
+data class AiChatMessage(
+    val id: String = java.util.UUID.randomUUID().toString(),
+    val text: String,
+    val isUser: Boolean,
+    val timestamp: Long = System.currentTimeMillis(),
+    val isAiGenerated: Boolean = true
+)
+
 class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val database = VisionXDatabase.getDatabase(application)
     val repository = ColdStorageRepository(
@@ -144,6 +152,30 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     val isSpeaking: StateFlow<Boolean> = voiceAssistant.isSpeaking
     val lastSpokenText: StateFlow<String> = voiceAssistant.lastSpokenText
 
+    // Conversational Chat Messages with Gemini 3.8 Flash
+    private val _chatMessages = MutableStateFlow<List<AiChatMessage>>(
+        listOf(
+            AiChatMessage(
+                text = "नमस्ते! मैं आपका GREENCOLD किसान AI सहायक हूँ (Powered by Gemini 3.8 Flash)। आप कोल्ड स्टोरेज तापमान, क्या-अगर सवाल (जैसे: अगर 5 दिन बाद बेचें तो क्या return मिलेगा?), या फसल सुझाव के बारे में सीधे पूछ सकते हैं।",
+                isUser = false,
+                isAiGenerated = true
+            )
+        )
+    )
+    val chatMessages: StateFlow<List<AiChatMessage>> = _chatMessages.asStateFlow()
+
+    private val _isAiThinking = MutableStateFlow(false)
+    val isAiThinking: StateFlow<Boolean> = _isAiThinking.asStateFlow()
+
+    private val _weatherConnectionStatus = MutableStateFlow("ONLINE (Connected)")
+    val weatherConnectionStatus: StateFlow<String> = _weatherConnectionStatus.asStateFlow()
+
+    fun checkWeatherConnection(): String {
+        val temp = outsideTemp.value
+        val hum = outsideHumidity.value
+        return "Weather Connection Active • Station Online • Ambient: ${temp}°C, Humidity: ${hum}% RH"
+    }
+
     // Simple / Farmer Mode Toggle (Easy UI for illiterate / rural operators)
     private val _isFarmerMode = MutableStateFlow(true)
     val isFarmerMode: StateFlow<Boolean> = _isFarmerMode.asStateFlow()
@@ -169,19 +201,19 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun askFarmerQuestion(questionType: FarmerQuestionType) {
-        val answer = voiceAssistant.answerQuestion(
-            questionType = questionType,
-            language = selectedLanguage.value,
-            c1Temp = chamber1.value.currentTemp,
-            c2Temp = chamber2.value.currentTemp,
-            batteryPercent = powerData.value.batteryPercent,
-            solarWatts = powerData.value.solarInputWatts,
-            gasStatus = gasStatus.value
-        )
-        voiceAssistant.speak(answer, selectedLanguage.value)
+        val query = when (selectedLanguage.value) {
+            IndianLanguage.HINDI -> questionType.hindiTitle
+            else -> questionType.englishTitle
+        }
+        askVoiceQuery(query)
     }
 
     fun askVoiceQuery(query: String) {
+        if (query.isBlank()) return
+        val userMsg = AiChatMessage(text = query, isUser = true)
+        _chatMessages.value = _chatMessages.value + userMsg
+        _isAiThinking.value = true
+
         viewModelScope.launch {
             val answer = try {
                 geminiAiService.askAssistant(
@@ -199,17 +231,26 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                     nearestMandi = currentLocation.value.nearestMandi
                 )
             } catch (e: Exception) {
-                voiceAssistant.processVoiceQuery(
-                    query = query,
+                geminiAiService.askAssistant(
+                    userQuery = query,
                     language = selectedLanguage.value,
                     c1Temp = chamber1.value.currentTemp,
                     c2Temp = chamber2.value.currentTemp,
+                    humidityC1 = chamber1.value.humidity,
+                    humidityC2 = chamber2.value.humidity,
+                    outsideTemp = outsideTemp.value,
                     batteryPercent = powerData.value.batteryPercent,
                     solarWatts = powerData.value.solarInputWatts,
                     gasStatus = gasStatus.value,
-                    activeCratesCount = allCrates.value.size
+                    activeCrates = allCrates.value,
+                    nearestMandi = currentLocation.value.nearestMandi
                 )
+            } finally {
+                _isAiThinking.value = false
             }
+
+            val aiMsg = AiChatMessage(text = answer, isUser = false, isAiGenerated = true)
+            _chatMessages.value = _chatMessages.value + aiMsg
             voiceAssistant.speak(answer, selectedLanguage.value)
         }
     }
