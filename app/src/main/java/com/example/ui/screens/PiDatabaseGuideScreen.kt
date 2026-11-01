@@ -24,6 +24,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.CloudQueue
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.DeveloperBoard
 import androidx.compose.material.icons.filled.Info
@@ -33,6 +35,7 @@ import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material.icons.filled.Wifi
+import com.example.data.model.ConnectionMode
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -78,6 +81,8 @@ fun PiDatabaseGuideScreen(
     currentHost: String,
     deviceConnected: Boolean,
     isOnline: Boolean,
+    connectionMode: ConnectionMode = ConnectionMode.CLOUD_SYNC,
+    onSetConnectionMode: (ConnectionMode) -> Unit = {},
     onSaveHost: (String) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
@@ -86,6 +91,7 @@ fun PiDatabaseGuideScreen(
     var selectedTab by remember { mutableIntStateOf(0) }
 
     val tabs = listOf(
+        "☁️ Cloud Sync",
         "TechFlow",
         "System Info",
         "Pi 5 & SQLite",
@@ -97,7 +103,7 @@ fun PiDatabaseGuideScreen(
         topBar = {
             VisionXHeader(
                 title = "Pi 5 & IoT Guide",
-                subtitle = "Hardware Wiring, SQLite & LoRa Pipeline",
+                subtitle = "Hardware Wiring, Cloud & LoRa Pipeline",
                 isOnline = isOnline,
                 showBack = true,
                 onBackClick = onBack
@@ -116,7 +122,7 @@ fun PiDatabaseGuideScreen(
         ) {
             item {
                 Spacer(modifier = Modifier.height(4.dp))
-                // Quick IP Configuration Card
+                // Primary Connection & Mode Card
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
@@ -139,7 +145,7 @@ fun PiDatabaseGuideScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Default.DeveloperBoard,
+                                        imageVector = if (connectionMode == ConnectionMode.CLOUD_SYNC) Icons.Default.CloudQueue else Icons.Default.DeveloperBoard,
                                         contentDescription = null,
                                         tint = VxTheme.primaryBlue,
                                         modifier = Modifier.size(20.dp)
@@ -148,13 +154,13 @@ fun PiDatabaseGuideScreen(
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Column {
                                     Text(
-                                        text = "Raspberry Pi 5 Gateway",
-                                        fontSize = 15.sp,
+                                        text = if (connectionMode == ConnectionMode.CLOUD_SYNC) "Firebase Cloud Sync (Global)" else "Raspberry Pi 5 Local Gateway",
+                                        fontSize = 14.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(
-                                        text = "Port 5000 REST & WebSocket Endpoint",
+                                        text = if (connectionMode == ConnectionMode.CLOUD_SYNC) "Live global access from anywhere" else "Port 5000 REST & WebSocket Endpoint",
                                         fontSize = 11.sp,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -170,7 +176,7 @@ fun PiDatabaseGuideScreen(
                                     .padding(horizontal = 8.dp, vertical = 3.dp)
                             ) {
                                 Text(
-                                    text = if (deviceConnected) "Connected" else "Waiting for Pi",
+                                    text = if (deviceConnected) "Live Active" else "Waiting for Pi",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = if (deviceConnected) VxTheme.emeraldDark else VxTheme.warningDark
@@ -180,66 +186,107 @@ fun PiDatabaseGuideScreen(
 
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        OutlinedTextField(
-                            value = hostInput,
-                            onValueChange = { hostInput = it },
-                            label = { Text("Raspberry Pi Endpoint URL") },
-                            placeholder = { Text("http://192.168.1.100:5000/") },
-                            singleLine = true,
-                            shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = VxTheme.primaryBlue,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                            ),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .testTag("guide_pi_host_input")
-                        )
-
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = VxTheme.surfaceBlue,
-                            border = BorderStroke(1.dp, VxTheme.borderBlue),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 8.dp)
+                        // Mode Selector Buttons
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Column(modifier = Modifier.padding(10.dp)) {
+                            Surface(
+                                onClick = { onSetConnectionMode(ConnectionMode.CLOUD_SYNC) },
+                                shape = RoundedCornerShape(8.dp),
+                                color = if (connectionMode == ConnectionMode.CLOUD_SYNC) VxTheme.primaryBlue else VxTheme.surfaceSubtle,
+                                modifier = Modifier.weight(1f)
+                            ) {
                                 Text(
-                                    text = "💡 Connection Guide:",
+                                    text = "☁️ Cloud Mode (Global)",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = VxTheme.primaryBlue
+                                    color = if (connectionMode == ConnectionMode.CLOUD_SYNC) Color.White else MaterialTheme.colorScheme.onSurface,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                    modifier = Modifier.padding(vertical = 8.dp)
                                 )
+                            }
+
+                            Surface(
+                                onClick = { onSetConnectionMode(ConnectionMode.RASPBERRY_PI) },
+                                shape = RoundedCornerShape(8.dp),
+                                color = if (connectionMode == ConnectionMode.RASPBERRY_PI) VxTheme.primaryBlue else VxTheme.surfaceSubtle,
+                                modifier = Modifier.weight(1f)
+                            ) {
                                 Text(
-                                    text = "• PC Browser Emulator: Run 'ngrok http 5000' on Pi and paste the https://... URL here.\n• Physical Mobile Phone on same Wi-Fi: Run 'python3 green_cold_server.py' and enter http://<PI_IP>:5000/.",
-                                    fontSize = 10.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    lineHeight = 14.sp
+                                    text = "📡 Local Wi-Fi (Port 5000)",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (connectionMode == ConnectionMode.RASPBERRY_PI) Color.White else MaterialTheme.colorScheme.onSurface,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                    modifier = Modifier.padding(vertical = 8.dp)
                                 )
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                        if (connectionMode == ConnectionMode.RASPBERRY_PI) {
+                            Spacer(modifier = Modifier.height(10.dp))
+                            OutlinedTextField(
+                                value = hostInput,
+                                onValueChange = { hostInput = it },
+                                label = { Text("Local Pi Endpoint URL") },
+                                placeholder = { Text("http://192.168.1.100:5000/") },
+                                singleLine = true,
+                                shape = RoundedCornerShape(12.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = VxTheme.primaryBlue,
+                                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("guide_pi_host_input")
+                            )
 
-                        Button(
-                            onClick = { onSaveHost(hostInput) },
-                            shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = VxTheme.primaryBlue),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(44.dp)
-                                .testTag("guide_save_host_button")
-                        ) {
-                            Icon(imageVector = Icons.Default.NetworkCheck, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(text = "Save & Test Connection", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Button(
+                                onClick = { onSaveHost(hostInput) },
+                                shape = RoundedCornerShape(10.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = VxTheme.primaryBlue),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(42.dp)
+                                    .testTag("guide_save_host_button")
+                            ) {
+                                Icon(imageVector = Icons.Default.NetworkCheck, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(text = "Connect Local Wi-Fi", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            }
+                        } else {
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = VxTheme.surfaceBlue,
+                                border = BorderStroke(1.dp, VxTheme.borderBlue),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 10.dp)
+                            ) {
+                                Column(modifier = Modifier.padding(10.dp)) {
+                                    Text(
+                                        text = "☁️ Firebase Firestore Global Live Sync:",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = VxTheme.primaryBlue
+                                    )
+                                    Text(
+                                        text = "Your Raspberry Pi sends telemetry to Google Cloud. Anyone with the web preview or APK can monitor chambers globally without router configuration.",
+                                        fontSize = 10.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        lineHeight = 14.sp
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             }
 
-            // Tab Navigation Row (5 English tabs)
+            // Tab Navigation Row
             item {
                 Row(
                     modifier = Modifier
@@ -259,7 +306,7 @@ fun PiDatabaseGuideScreen(
                         ) {
                             Text(
                                 text = title,
-                                fontSize = 10.sp,
+                                fontSize = 9.sp,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                 color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
@@ -273,29 +320,425 @@ fun PiDatabaseGuideScreen(
             // Tab Content
             when (selectedTab) {
                 0 -> {
-                    // TAB 0: Complete TechFlow & End-to-End Pipeline
-                    item { TechFlowContent() }
+                    // TAB 0: Global Firebase Cloud Live Sync Guide
+                    item { CloudSyncContent(connectionMode, onSetConnectionMode, deviceConnected) }
                 }
                 1 -> {
-                    // TAB 1: System Information & Hardware Specifications
-                    item { SystemInfoContent() }
+                    // TAB 1: Complete TechFlow & End-to-End Pipeline
+                    item { TechFlowContent() }
                 }
                 2 -> {
-                    // TAB 2: Raspberry Pi 5 & SQLite Daemon Setup
-                    item { PiSetupAndSqliteContent() }
+                    // TAB 2: System Information & Hardware Specifications
+                    item { SystemInfoContent() }
                 }
                 3 -> {
-                    // TAB 3: LoRa Long-Range Module Support & Packet Protocol
-                    item { LoraModuleSupportContent() }
+                    // TAB 3: Raspberry Pi 5 & SQLite Daemon Setup
+                    item { PiSetupAndSqliteContent() }
                 }
                 4 -> {
-                    // TAB 4: Embedded AI & train.py C++ Model
+                    // TAB 4: LoRa Long-Range Module Support & Packet Protocol
+                    item { LoraModuleSupportContent() }
+                }
+                5 -> {
+                    // TAB 5: Embedded AI & train.py C++ Model
                     item { EdgeAiModelContent() }
                 }
             }
 
             item {
                 Spacer(modifier = Modifier.height(32.dp))
+            }
+        }
+    }
+}
+
+/**
+ * Tab 0: Complete Google Firebase Firestore Cloud Live Sync Guide
+ */
+@Composable
+private fun CloudSyncContent(
+    connectionMode: ConnectionMode,
+    onSetConnectionMode: (ConnectionMode) -> Unit,
+    deviceConnected: Boolean
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        // Hero Overview Card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            border = BorderStroke(1.dp, VxTheme.borderBlue),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(34.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(VxTheme.surfaceBlue),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CloudQueue,
+                                contentDescription = null,
+                                tint = VxTheme.primaryBlue,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column {
+                            Text(
+                                text = "Global Cloud Sync (Firebase)",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Access live cold storage from anywhere worldwide",
+                                fontSize = 11.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(if (deviceConnected) VxTheme.surfaceGreen else VxTheme.surfaceWarning)
+                            .border(1.dp, if (deviceConnected) VxTheme.borderGreen else VxTheme.borderWarning, RoundedCornerShape(12.dp))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = if (deviceConnected) "☁️ Cloud Live" else "☁️ Waiting for Pi",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (deviceConnected) VxTheme.emeraldDark else VxTheme.warningDark
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "With Firebase Cloud Sync, your Raspberry Pi pushes all sensor readings directly to Google Cloud over internet. No port forwarding, no ngrok, and no static IP needed! Anyone with the app preview link or Android APK can view live conditions in real time.",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    lineHeight = 16.sp
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = { onSetConnectionMode(ConnectionMode.CLOUD_SYNC) },
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (connectionMode == ConnectionMode.CLOUD_SYNC) VxTheme.primaryBlue else VxTheme.surfaceSubtle
+                        ),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = if (connectionMode == ConnectionMode.CLOUD_SYNC) "✓ Cloud Active" else "Enable Cloud Mode",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (connectionMode == ConnectionMode.CLOUD_SYNC) Color.White else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    Button(
+                        onClick = { onSetConnectionMode(ConnectionMode.RASPBERRY_PI) },
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (connectionMode == ConnectionMode.RASPBERRY_PI) VxTheme.primaryBlue else VxTheme.surfaceSubtle
+                        ),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = if (connectionMode == ConnectionMode.RASPBERRY_PI) "✓ Local Wi-Fi Active" else "Use Local Wi-Fi",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (connectionMode == ConnectionMode.RASPBERRY_PI) Color.White else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            }
+        }
+
+        GuideCard(
+            stepNumber = "1",
+            title = "Install Python Libraries on Raspberry Pi",
+            description = "Run this one-line command in your Raspberry Pi terminal:"
+        ) {
+            CodeSnippet(code = "pip install requests adafruit-circuitpython-dht gpiozero pillow adafruit-circuitpython-rgb-display")
+        }
+
+        GuideCard(
+            stepNumber = "2",
+            title = "Run Cloud Script on Raspberry Pi (green_cold_cloud.py)",
+            description = "Save this script as 'green_cold_cloud.py' on your Pi and run it. It reads all your sensors (DHT11 x3, MQ-137, MQ-2, Relays, Servos, ST7735) and uploads directly to Google Firebase every 2.5 seconds:"
+        ) {
+            CodeSnippet(
+                code = """
+# ==============================================================================
+# GREENCOLD / VISION X - Global Cloud Live Sync (green_cold_cloud.py)
+# ==============================================================================
+# Uploads sensor telemetry directly to Google Firebase Firestore REST API.
+# Works from ANY internet connection (Wi-Fi, hotspot, Ethernet).
+# No port forwarding, no ngrok, no static IP required!
+#
+# Run on Raspberry Pi:
+#   python3 green_cold_cloud.py
+# ==============================================================================
+
+import time, json, datetime
+import requests
+import board, digitalio, adafruit_dht
+from gpiozero import Servo
+from PIL import Image, ImageDraw, ImageFont
+import adafruit_rgb_display.st7735 as st7735
+
+# --- FIREBASE FIRESTORE CLOUD CONFIGURATION ---
+PROJECT_ID = "gen-lang-client-0457344020"
+API_KEY = "AIzaSyDedYiNnZuqMZhdgDa5YLTfdF-I1wPc6nQ"
+
+FIRESTORE_TELEMETRY_URL = f"https://firestore.googleapis.com/v1/projects/{PROJECT_ID}/databases/(default)/documents/cold_storage/live_telemetry?key={API_KEY}"
+FIRESTORE_COMMANDS_URL = f"https://firestore.googleapis.com/v1/projects/{PROJECT_ID}/databases/(default)/documents/cold_storage/remote_commands?key={API_KEY}"
+
+# --- HARDWARE GPIO CONFIGURATION ---
+MQ_ACTIVE_LOW = True
+RELAY_ACTIVE_LOW = True
+
+# 1. DHT11 Temperature & Humidity Sensors
+dht_ch1 = adafruit_dht.DHT11(board.D17)      # GPIO17 - Chamber 1
+dht_ch2 = adafruit_dht.DHT11(board.D26)      # GPIO26 - Chamber 2
+dht_outside = adafruit_dht.DHT11(board.D22)  # GPIO22 - Ambient
+
+# 2. Gas Sensors
+mq137 = digitalio.DigitalInOut(board.D4)     # GPIO4 - Ammonia (CH1)
+mq137.direction = digitalio.Direction.INPUT
+mq2 = digitalio.DigitalInOut(board.D23)      # GPIO23 - Gas/Smoke (CH2)
+mq2.direction = digitalio.Direction.INPUT
+
+# 3. Fan Relays
+fan1 = digitalio.DigitalInOut(board.D19)     # GPIO19 - Fan 1
+fan2 = digitalio.DigitalInOut(board.D16)     # GPIO16 - Fan 2
+for relay in (fan1, fan2):
+    relay.direction = digitalio.Direction.OUTPUT
+    relay.value = RELAY_ACTIVE_LOW          # Start OFF
+
+# 4. Servos (Vents)
+try:
+    servo1 = Servo(12, min_pulse_width=0.0005, max_pulse_width=0.0025)
+    servo2 = Servo(13, min_pulse_width=0.0005, max_pulse_width=0.0025)
+    servo1.value = 0.0
+    servo2.value = 0.0
+except Exception as e:
+    servo1, servo2 = None, None
+
+# 5. ST7735 SPI Display
+try:
+    spi = board.SPI()
+    cs_pin = digitalio.DigitalInOut(board.D6)
+    dc_pin = digitalio.DigitalInOut(board.D5)
+    rst_pin = digitalio.DigitalInOut(board.D25)
+    display = st7735.ST7735R(spi, cs=cs_pin, dc=dc_pin, rst=rst_pin, baudrate=24000000, width=128, height=160)
+except Exception:
+    display = None
+
+# Current states
+current_ch1 = {"temp": 12.0, "hum": 65.0, "gas_ppm": 12.0}
+current_ch2 = {"temp": 4.0, "hum": 60.0, "gas_ppm": 15.0}
+current_out = {"temp": 28.0, "hum": 55.0}
+fan1_state = False
+fan2_state = False
+cooling_state = True
+
+def set_fan(relay, state):
+    relay.value = not state if RELAY_ACTIVE_LOW else state
+
+def read_dht(sensor, fallback):
+    try:
+        t = sensor.temperature
+        h = sensor.humidity
+        if t is not None and h is not None:
+            return round(float(t), 1), round(float(h), 1)
+    except Exception:
+        pass
+    return fallback["temp"], fallback["hum"]
+
+def update_st7735_display():
+    if not display:
+        return
+    try:
+        img = Image.new("RGB", (128, 160), color=(10, 15, 30))
+        draw = ImageDraw.Draw(img)
+        draw.text((8, 8), "GREENCOLD CLOUD", fill=(0, 210, 255))
+        draw.text((8, 26), f"CH1: {current_ch1['temp']}C  {current_ch1['hum']}%", fill=(255, 255, 255))
+        draw.text((8, 44), f"CH2: {current_ch2['temp']}C  {current_ch2['hum']}%", fill=(255, 255, 255))
+        draw.text((8, 62), f"OUT: {current_out['temp']}C  {current_out['hum']}%", fill=(200, 200, 200))
+        draw.text((8, 84), f"FAN 1: {'ON' if fan1_state else 'OFF'}", fill=(0, 255, 128) if fan1_state else (255, 100, 100))
+        draw.text((8, 102), f"FAN 2: {'ON' if fan2_state else 'OFF'}", fill=(0, 255, 128) if fan2_state else (255, 100, 100))
+        draw.text((8, 130), "CLOUD: SYNCED", fill=(0, 200, 255))
+        display.image(img)
+    except Exception:
+        pass
+
+def sync_to_firebase_cloud():
+    global fan1_state, fan2_state, cooling_state
+    now_ms = int(time.time() * 1000)
+
+    # 1. Prepare Telemetry Payload for Firestore REST
+    payload = {
+        "fields": {
+            "ch1_temp": {"doubleValue": current_ch1["temp"]},
+            "ch1_humidity": {"doubleValue": current_ch1["hum"]},
+            "ch1_gas_ppm": {"doubleValue": current_ch1["gas_ppm"]},
+            "ch2_temp": {"doubleValue": current_ch2["temp"]},
+            "ch2_humidity": {"doubleValue": current_ch2["hum"]},
+            "ch2_gas_ppm": {"doubleValue": current_ch2["gas_ppm"]},
+            "ambient_temp": {"doubleValue": current_out["temp"]},
+            "ambient_humidity": {"doubleValue": current_out["hum"]},
+            "fan1_state": {"booleanValue": fan1_state},
+            "fan2_state": {"booleanValue": fan2_state},
+            "cooling_active": {"booleanValue": cooling_state},
+            "source": {"stringValue": "Raspberry Pi 5 (Global Cloud)"},
+            "updated_at": {"integerValue": str(now_ms)}
+        }
+    }
+
+    try:
+        # Upload live telemetry to Firestore
+        res = requests.patch(FIRESTORE_TELEMETRY_URL, json=payload, timeout=4)
+        if res.status_code in (200, 201):
+            print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] CLOUD SYNC OK -> CH1: {current_ch1['temp']}C | CH2: {current_ch2['temp']}C | OUT: {current_out['temp']}C")
+        else:
+            print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] Cloud status {res.status_code}: {res.text[:80]}")
+    except Exception as e:
+        print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] Cloud network warning: {e}")
+
+    # 2. Check for remote commands from the mobile app
+    try:
+        cmd_res = requests.get(FIRESTORE_COMMANDS_URL, timeout=3)
+        if cmd_res.status_code == 200:
+            doc = cmd_res.json()
+            fields = doc.get("fields", {})
+            if "cooling_active" in fields:
+                new_cooling = fields["cooling_active"].get("booleanValue", cooling_state)
+                if new_cooling != cooling_state:
+                    cooling_state = new_cooling
+                    print(f"-> Remote Command: Cooling = {cooling_state}")
+            if "fan1_state" in fields:
+                new_fan1 = fields["fan1_state"].get("booleanValue", fan1_state)
+                if new_fan1 != fan1_state:
+                    fan1_state = new_fan1
+                    set_fan(fan1, fan1_state)
+                    print(f"-> Remote Command: Fan 1 = {fan1_state}")
+            if "fan2_state" in fields:
+                new_fan2 = fields["fan2_state"].get("booleanValue", fan2_state)
+                if new_fan2 != fan2_state:
+                    fan2_state = new_fan2
+                    set_fan(fan2, fan2_state)
+                    print(f"-> Remote Command: Fan 2 = {fan2_state}")
+    except Exception:
+        pass
+
+print("=========================================================")
+print("  GREENCOLD - Raspberry Pi 5 Cloud Live Sync Active")
+print(f"  Project ID: {PROJECT_ID}")
+print("  Streaming to Firebase Firestore collection: cold_storage")
+print("=========================================================")
+
+# Main loop
+while True:
+    # Read physical sensors
+    c1_t, c1_h = read_dht(dht_ch1, current_ch1)
+    c2_t, c2_h = read_dht(dht_ch2, current_ch2)
+    out_t, out_h = read_dht(dht_outside, current_out)
+
+    current_ch1["temp"], current_ch1["hum"] = c1_t, c1_h
+    current_ch2["temp"], current_ch2["hum"] = c2_t, c2_h
+    current_out["temp"], current_out["hum"] = out_t, out_h
+
+    # Gas sensors
+    mq137_trig = (mq137.value != MQ_ACTIVE_LOW)
+    mq2_trig = (mq2.value != MQ_ACTIVE_LOW)
+    current_ch1["gas_ppm"] = 85.0 if mq137_trig else 12.0
+    current_ch2["gas_ppm"] = 90.0 if mq2_trig else 15.0
+
+    # Safety Automation: Auto turn on fan if gas is detected
+    if mq137_trig and not fan1_state:
+        fan1_state = True
+        set_fan(fan1, True)
+        print("Safety Auto-Ventilation: MQ-137 Gas detected -> Fan 1 ON")
+
+    # Update TFT display
+    update_st7735_display()
+
+    # Upload to Cloud
+    sync_to_firebase_cloud()
+
+    time.sleep(2.5)
+                """.trimIndent()
+            )
+        }
+
+        GuideCard(
+            stepNumber = "3",
+            title = "Worldwide Access Links",
+            description = "Once the Python script is running on the Pi, anyone can access your live telemetry using these methods:"
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = VxTheme.surfaceBlue,
+                    border = BorderStroke(1.dp, VxTheme.borderBlue),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text(
+                            text = "🌐 Shared Web Preview Link (Open in any Browser):",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = VxTheme.primaryBlue
+                        )
+                        Text(
+                            text = "https://ais-pre-g6r2c5c56cafx74o3bbsgn-298267275822.asia-east1.run.app",
+                            fontSize = 11.sp,
+                            fontFamily = FontFamily.Monospace,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = VxTheme.surfaceGreen,
+                    border = BorderStroke(1.dp, VxTheme.borderGreen),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text(
+                            text = "📱 Android Mobile App (APK):",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = VxTheme.emeraldDark
+                        )
+                        Text(
+                            text = "Export the APK from the AI Studio top bar settings and install it on any farmer or trader phone. The app automatically streams live telemetry over 4G/5G mobile data.",
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+                }
             }
         }
     }

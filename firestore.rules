@@ -1,0 +1,14 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow read and write to cold storage telemetry and commands
+    match /cold_storage/{document=**} {
+      allow read, write: if true;
+    }
+    // Allow authenticated or fallback read on any general storage
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

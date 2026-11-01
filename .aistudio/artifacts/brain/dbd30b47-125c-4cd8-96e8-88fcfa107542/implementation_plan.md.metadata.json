@@ -1,6 +1,6 @@
 {
-  "summary":  "Implementation plan to bridge the Raspberry Pi 5 to the browser emulator via free cloud tunnel or physical phone Wi-Fi, starting the integrated REST API on port 5000, and upgrading the Android app with auto-sanitizing URLs and connection diagnostics.",
-  "updatedAt":  "2026-11-01T07:32:06.777158634Z",
+  "summary":  "Implementation plan for enabling global cloud sync via Firebase Firestore for GREENCOLD Smart Cold Storage. Allows Raspberry Pi to stream live sensor telemetry to Firestore REST/SDK and enables anyone with the app or web preview to view real-time temperatures, gas levels, and alerts from anywhere in the world.",
+  "updatedAt":  "2026-11-01T08:22:35.451280118Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

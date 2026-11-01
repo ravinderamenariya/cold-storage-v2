@@ -29,6 +29,9 @@ import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.SetOptions
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.math.cos
@@ -45,7 +48,7 @@ class ColdStorageRepository(
     private val coroutineScope: CoroutineScope
 ) {
     // Current connection mode & settings
-    private val _connectionMode = MutableStateFlow(ConnectionMode.DEMO)
+    private val _connectionMode = MutableStateFlow(ConnectionMode.CLOUD_SYNC)
     val connectionMode: StateFlow<ConnectionMode> = _connectionMode.asStateFlow()
 
     private val _isOnline = MutableStateFlow(true)
@@ -119,6 +122,9 @@ class ColdStorageRepository(
         initRetrofit()
         coroutineScope.launch(Dispatchers.IO) {
             seedInitialDatabaseIfEmpty()
+            if (_connectionMode.value == ConnectionMode.CLOUD_SYNC) {
+                startFirestoreSync()
+            }
             startTelemetryLoop()
         }
     }
@@ -169,17 +175,111 @@ class ColdStorageRepository(
         }
     }
 
+    private var firestoreListener: ListenerRegistration? = null
+
+    private fun startFirestoreSync() {
+        if (firestoreListener != null) return
+        try {
+            val db = FirebaseFirestore.getInstance()
+            _syncStatus.value = "Connecting to Cloud..."
+            firestoreListener = db.collection("cold_storage")
+                .document("live_telemetry")
+                .addSnapshotListener { snapshot, error ->
+                    if (error != null) {
+                        if (_connectionMode.value == ConnectionMode.CLOUD_SYNC) {
+                            _deviceConnected.value = false
+                            _syncStatus.value = "Cloud Sync Error"
+                        }
+                        return@addSnapshotListener
+                    }
+
+                    if (snapshot != null && snapshot.exists() && _connectionMode.value == ConnectionMode.CLOUD_SYNC) {
+                        try {
+                            val c1Temp = (snapshot.get("ch1_temp") as? Number)?.toDouble() ?: 0.0
+                            val c1Hum = (snapshot.get("ch1_humidity") as? Number)?.toDouble() ?: 0.0
+                            val c1Gas = (snapshot.get("ch1_gas_ppm") as? Number)?.toDouble() ?: 0.0
+                            val c2Temp = (snapshot.get("ch2_temp") as? Number)?.toDouble() ?: 0.0
+                            val c2Hum = (snapshot.get("ch2_humidity") as? Number)?.toDouble() ?: 0.0
+                            val c2Gas = (snapshot.get("ch2_gas_ppm") as? Number)?.toDouble() ?: 0.0
+                            val ambTemp = (snapshot.get("ambient_temp") as? Number)?.toDouble() ?: 0.0
+                            val ambHum = (snapshot.get("ambient_humidity") as? Number)?.toDouble() ?: 0.0
+                            val fan1 = snapshot.getBoolean("fan1_state") ?: true
+                            val fan2 = snapshot.getBoolean("fan2_state") ?: false
+                            val cooling = snapshot.getBoolean("cooling_active") ?: true
+                            val updatedAt = (snapshot.get("updated_at") as? Number)?.toLong() ?: System.currentTimeMillis()
+
+                            val now = System.currentTimeMillis()
+                            val isRecent = abs(now - updatedAt) < 45_000 // Last seen within 45s is live
+                            _deviceConnected.value = isRecent
+                            _syncStatus.value = if (isRecent) "Cloud Live" else "Cloud (Pi Idle)"
+                            _lastUpdatedTime.value = updatedAt
+
+                            _chamber1.value = _chamber1.value.copy(
+                                currentTemp = c1Temp,
+                                humidity = c1Hum,
+                                status = if (c1Temp == 0.0) "Unavailable" else if (abs(c1Temp - 12.0) <= 2.0) "Normal" else "Warning",
+                                coolingActive = cooling,
+                                fanActive = fan1
+                            )
+
+                            _chamber2.value = _chamber2.value.copy(
+                                currentTemp = c2Temp,
+                                humidity = c2Hum,
+                                status = if (c2Temp == 0.0) "Unavailable" else if (abs(c2Temp - 4.0) <= 2.0) "Normal" else "Warning",
+                                coolingActive = cooling,
+                                fanActive = fan2
+                            )
+
+                            _outsideTemp.value = ambTemp
+                            _outsideHumidity.value = ambHum
+                            _gasStatus.value = if (c1Gas > 50.0 || c2Gas > 50.0) "Elevated" else "Normal"
+                            _coolingActive.value = cooling
+                            _fansActive.value = fan1 || fan2
+
+                            coroutineScope.launch(Dispatchers.IO) {
+                                recordSensorSnapshot()
+                            }
+                        } catch (_: Exception) {}
+                    }
+                }
+        } catch (_: Exception) {
+            _deviceConnected.value = false
+            _syncStatus.value = "Cloud Unavailable"
+        }
+    }
+
+    private fun stopFirestoreSync() {
+        firestoreListener?.remove()
+        firestoreListener = null
+    }
+
     fun setConnectionMode(mode: ConnectionMode) {
         _connectionMode.value = mode
-        if (mode == ConnectionMode.RASPBERRY_PI) {
-            _deviceConnected.value = false
-            _chamber1.value = _chamber1.value.copy(currentTemp = 0.0, humidity = 0.0, status = "Disconnected", coolingActive = false, fanActive = false)
-            _chamber2.value = _chamber2.value.copy(currentTemp = 0.0, humidity = 0.0, status = "Disconnected", coolingActive = false, fanActive = false)
-            _outsideTemp.value = 0.0
-            _outsideHumidity.value = 0.0
-            _gasStatus.value = "Unknown"
-            _coolingActive.value = false
-            _fansActive.value = false
+        when (mode) {
+            ConnectionMode.CLOUD_SYNC -> {
+                startFirestoreSync()
+                _syncStatus.value = "Cloud Live"
+            }
+            ConnectionMode.RASPBERRY_PI -> {
+                stopFirestoreSync()
+                _deviceConnected.value = false
+                _syncStatus.value = "Local Wi-Fi"
+                _chamber1.value = _chamber1.value.copy(currentTemp = 0.0, humidity = 0.0, status = "Disconnected", coolingActive = false, fanActive = false)
+                _chamber2.value = _chamber2.value.copy(currentTemp = 0.0, humidity = 0.0, status = "Disconnected", coolingActive = false, fanActive = false)
+                _outsideTemp.value = 0.0
+                _outsideHumidity.value = 0.0
+                _gasStatus.value = "Unknown"
+                _coolingActive.value = false
+                _fansActive.value = false
+                coroutineScope.launch(Dispatchers.IO) {
+                    pollRaspberryPi()
+                }
+            }
+            ConnectionMode.DEMO -> {
+                stopFirestoreSync()
+                _deviceConnected.value = true
+                _syncStatus.value = "Demo Mode"
+            }
         }
     }
 
@@ -196,40 +296,52 @@ class ColdStorageRepository(
     }
 
     fun toggleCooling(enabled: Boolean) {
+        _coolingActive.value = enabled
+        _chamber1.value = _chamber1.value.copy(coolingActive = enabled)
+        _chamber2.value = _chamber2.value.copy(coolingActive = enabled)
+
         if (_connectionMode.value == ConnectionMode.RASPBERRY_PI) {
             coroutineScope.launch(Dispatchers.IO) {
                 try {
                     val response = raspberryPiApi?.toggleCooling(enabled)
                     if (response != null && response.isSuccessful) {
                         _coolingActive.value = enabled
-                        _chamber1.value = _chamber1.value.copy(coolingActive = enabled)
-                        _chamber2.value = _chamber2.value.copy(coolingActive = enabled)
                     }
                 } catch (_: Exception) {}
             }
-        } else {
-            _coolingActive.value = enabled
-            _chamber1.value = _chamber1.value.copy(coolingActive = enabled)
-            _chamber2.value = _chamber2.value.copy(coolingActive = enabled)
+        } else if (_connectionMode.value == ConnectionMode.CLOUD_SYNC) {
+            coroutineScope.launch(Dispatchers.IO) {
+                try {
+                    FirebaseFirestore.getInstance().collection("cold_storage")
+                        .document("remote_commands")
+                        .set(mapOf("cooling_active" to enabled, "updated_at" to System.currentTimeMillis()), SetOptions.merge())
+                } catch (_: Exception) {}
+            }
         }
     }
 
     fun toggleFans(enabled: Boolean) {
+        _fansActive.value = enabled
+        _chamber1.value = _chamber1.value.copy(fanActive = enabled)
+        _chamber2.value = _chamber2.value.copy(fanActive = enabled)
+
         if (_connectionMode.value == ConnectionMode.RASPBERRY_PI) {
             coroutineScope.launch(Dispatchers.IO) {
                 try {
                     val response = raspberryPiApi?.toggleFans(enabled)
                     if (response != null && response.isSuccessful) {
                         _fansActive.value = enabled
-                        _chamber1.value = _chamber1.value.copy(fanActive = enabled)
-                        _chamber2.value = _chamber2.value.copy(fanActive = enabled)
                     }
                 } catch (_: Exception) {}
             }
-        } else {
-            _fansActive.value = enabled
-            _chamber1.value = _chamber1.value.copy(fanActive = enabled)
-            _chamber2.value = _chamber2.value.copy(fanActive = enabled)
+        } else if (_connectionMode.value == ConnectionMode.CLOUD_SYNC) {
+            coroutineScope.launch(Dispatchers.IO) {
+                try {
+                    FirebaseFirestore.getInstance().collection("cold_storage")
+                        .document("remote_commands")
+                        .set(mapOf("fan1_state" to enabled, "fan2_state" to enabled, "updated_at" to System.currentTimeMillis()), SetOptions.merge())
+                } catch (_: Exception) {}
+            }
         }
     }
 
@@ -248,7 +360,9 @@ class ColdStorageRepository(
                         pollRaspberryPi()
                     }
                     ConnectionMode.CLOUD_SYNC -> {
-                        simulateTelemetryTick()
+                        if (firestoreListener == null) {
+                            startFirestoreSync()
+                        }
                     }
                 }
             } catch (_: Exception) {

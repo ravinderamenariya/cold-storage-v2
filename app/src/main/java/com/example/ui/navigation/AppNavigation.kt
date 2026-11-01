@@ -376,6 +376,8 @@ fun AppNavigation(
                         currentHost = rpiHost,
                         deviceConnected = deviceConnected,
                         isOnline = isOnline,
+                        connectionMode = connectionMode,
+                        onSetConnectionMode = { viewModel.setConnectionMode(it) },
                         onSaveHost = { viewModel.setRaspberryPiHost(it) },
                         onBack = { viewModel.navigateTo(AppDestination.SETTINGS) }
                     )

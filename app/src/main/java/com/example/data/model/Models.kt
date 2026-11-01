@@ -35,7 +35,7 @@ enum class AlertSeverity {
 enum class ConnectionMode(val title: String) {
     DEMO("Demo Simulation"),
     RASPBERRY_PI("Raspberry Pi 5 (Local)"),
-    CLOUD_SYNC("Cloud Synchronized")
+    CLOUD_SYNC("Cloud Live (Firebase)")
 }
 
 /**
