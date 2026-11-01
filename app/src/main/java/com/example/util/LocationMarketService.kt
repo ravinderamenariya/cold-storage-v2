@@ -17,20 +17,20 @@ data class UserLocationInfo(
     val stateName: String,
     val nearestMandi: String,
     val priceMultiplier: Float,
-    val latitude: Double = 28.6139,
-    val longitude: Double = 77.2090
+    val latitude: Double = 24.5854,
+    val longitude: Double = 73.7125
 )
 
 class LocationMarketService(private val context: Context) {
 
     private val _currentLocation = MutableStateFlow(
         UserLocationInfo(
-            cityName = "Delhi",
-            stateName = "Delhi NCR",
-            nearestMandi = "Azadpur Mandi, Delhi",
-            priceMultiplier = 1.08f,
-            latitude = 28.7156,
-            longitude = 77.1788
+            cityName = "Udaipur",
+            stateName = "Rajasthan",
+            nearestMandi = "Krishi Upaj Mandi Samiti, Savina, Udaipur",
+            priceMultiplier = 0.96f,
+            latitude = 24.5854,
+            longitude = 73.7125
         )
     )
     val currentLocation: StateFlow<UserLocationInfo> = _currentLocation.asStateFlow()
@@ -40,8 +40,8 @@ class LocationMarketService(private val context: Context) {
         stateName: String,
         nearestMandi: String,
         priceMultiplier: Float,
-        latitude: Double = 28.6139,
-        longitude: Double = 77.2090
+        latitude: Double = 24.5854,
+        longitude: Double = 73.7125
     ) {
         _currentLocation.value = UserLocationInfo(
             cityName = cityName,
@@ -68,9 +68,13 @@ class LocationMarketService(private val context: Context) {
                 val addresses = geocoder.getFromLocation(gpsLocation.latitude, gpsLocation.longitude, 1)
                 if (!addresses.isNullOrEmpty()) {
                     val address = addresses[0]
-                    val city = address.locality ?: address.subAdminArea ?: "New Delhi"
-                    val state = address.adminArea ?: "Delhi"
-                    val mandiName = "$city APMC Mandi"
+                    val city = address.locality ?: address.subAdminArea ?: "Udaipur"
+                    val state = address.adminArea ?: "Rajasthan"
+                    val mandiName = if (city.contains("Udaipur", ignoreCase = true)) {
+                        "Krishi Upaj Mandi Samiti, Savina, Udaipur"
+                    } else {
+                        "$city APMC Mandi"
+                    }
                     val multiplier = getMultiplierForState(state)
 
                     val info = UserLocationInfo(
@@ -89,14 +93,14 @@ class LocationMarketService(private val context: Context) {
             Log.w("LocationMarketService", "GPS Geocoding fallback: ${e.message}")
         }
 
-        // Default default fallback to Nashik / Maharashtra Hub
+        // Default fallback to Udaipur, Rajasthan / Mewar Cold Storage Hub
         val defaultInfo = UserLocationInfo(
-            cityName = "Nashik",
-            stateName = "Maharashtra",
-            nearestMandi = "Lasalgaon & Nashik APMC",
-            priceMultiplier = 0.95f,
-            latitude = 20.1472,
-            longitude = 74.2255
+            cityName = "Udaipur",
+            stateName = "Rajasthan",
+            nearestMandi = "Krishi Upaj Mandi Samiti, Savina, Udaipur",
+            priceMultiplier = 0.96f,
+            latitude = 24.5854,
+            longitude = 73.7125
         )
         _currentLocation.value = defaultInfo
         return@withContext defaultInfo
@@ -104,6 +108,7 @@ class LocationMarketService(private val context: Context) {
 
     private fun getMultiplierForState(state: String): Float {
         return when {
+            state.contains("Rajasthan", ignoreCase = true) -> 0.96f
             state.contains("Delhi", ignoreCase = true) -> 1.08f
             state.contains("Maharashtra", ignoreCase = true) -> 0.95f
             state.contains("Uttar Pradesh", ignoreCase = true) -> 0.92f

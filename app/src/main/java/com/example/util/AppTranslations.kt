@@ -49,7 +49,9 @@ object AppTranslations {
             "crates_stored" to "रखी हुई पेटियां",
             "ask_voice" to "कुछ भी पूछें",
             "language" to "भाषा",
-            "quick_questions" to "जरूरी सवाल (दबाकर पूछें)"
+            "quick_questions" to "जरूरी सवाल (दबाकर पूछें)",
+            "default_mandi_location" to "सविना मंडी, उदयपुर (Savina Mandi, Udaipur)",
+            "default_facility_location" to "उदयपुर, राजस्थान (मेवाड़ हब)"
         ),
         IndianLanguage.ENGLISH to mapOf(
             "app_title" to "VISION X",
@@ -86,7 +88,9 @@ object AppTranslations {
             "crates_stored" to "Active Crates",
             "ask_voice" to "Ask Voice Assistant",
             "language" to "Language",
-            "quick_questions" to "Quick Questions"
+            "quick_questions" to "Quick Questions",
+            "default_mandi_location" to "Savina Mandi, Udaipur, Rajasthan",
+            "default_facility_location" to "Udaipur, Rajasthan (Mewar Hub)"
         ),
         IndianLanguage.PUNJABI to mapOf(
             "app_title" to "ਵਿਜ਼ਨ ਐਕਸ",

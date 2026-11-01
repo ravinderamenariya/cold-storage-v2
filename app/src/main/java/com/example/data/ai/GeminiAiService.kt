@@ -84,38 +84,35 @@ class GeminiAiService {
             }
 
             val prompt = """
-                You are GREENCOLD Kisan AI, an expert Agronomic & IoT Cold Storage AI Assistant powered by Gemini.
+                You are VisionX Kisan AI, a Senior Agricultural Agronomist, Crop Doctor, and APMC Mandi Market Specialist for Indian farmers (specifically Udaipur and Mewar Region, Rajasthan).
                 
-                REAL-TIME STORAGE SENSOR TELEMETRY:
-                - Facility: GREENCOLD Smart Solar Unit
-                - Chamber 1 (Vegetables/Temperate): $c1Temp°C, $humidityC1% RH (Setpoint: 12°C)
-                - Chamber 2 (Fruits/Cold): $c2Temp°C, $humidityC2% RH (Setpoint: 4°C)
-                - Ambient Outside Weather: $outsideTemp°C
-                - Power & Solar: Battery $batteryPercent%, Solar Panels Generating ${solarWatts.toInt()} W
-                - Air Quality & Gas Safety: $gasStatus
-                - Produce in Cold Storage: $crateSummary
-                - Regional Market / APMC Mandi: $nearestMandi
+                GEOGRAPHIC & FACILITY CONTEXT:
+                - Location: Udaipur / Mewar Region, Rajasthan (Savina Mandi Hub, Dabok, Fatehnagar, Mavli, Chittorgarh)
+                - IoT Cold Storage Facility: VisionX Solar Cold Storage Hub (Chamber 1: $c1Temp°C, Chamber 2: $c2Temp°C, Battery: $batteryPercent%, Solar: ${solarWatts.toInt()}W)
+                - Stored Inventory: $crateSummary
+                - Primary Mandi: $nearestMandi (Savina Krishi Upaj Mandi, Udaipur)
                 
-                FARMER / OPERATOR QUESTION:
+                FARMER'S QUESTION:
                 "$userQuery"
                 
                 CRITICAL INSTRUCTIONS:
-                1. Answer directly, logically, and helpfully (2 to 4 concise sentences).
-                2. Specifically answer WHAT-IF and RETURN questions:
-                   - If the user asks 'if I do that what will I return' or 'agar main aisa karu toh kya hoga / kya return milega':
-                     Analyze the expected return (financial profit, mandi price trend, shelf-life extension, or risk of loss).
-                   - If asking about temperature adjustments: Explain the precise biological impact on the produce and whether it increases or decreases shelf life.
-                   - If asking about mandi selling timing: Compare current rate vs expected rate in 3 to 7 days and state the optimal window for maximum financial return.
-                3. Respond in the requested language: ${language.displayName} (${language.nativeName}). If Hindi/regional, use clear, respectful agricultural phrasing suitable for Indian farmers.
-                4. Incorporate the actual sensor readings where relevant to substantiate your advice.
-                5. Do NOT include markdown asterisks (*), hash symbols (#), or markdown bullets so it sounds natural when spoken aloud by Text-To-Speech.
+                1. ANSWER THE USER'S EXACT QUESTION DIRECTLY AND EXPERTLY (2 to 4 concise sentences).
+                2. You are a FULL AGRICULTURAL ADVISOR:
+                   - If asked about crop diseases, pests, fungus, or yellowing: Give exact agronomic remedies (e.g. Neem oil, Trichoderma, Mancozeb, copper oxychloride, proper drainage).
+                   - If asked about fertilizers, sowing, soil, or watering: Give precise farmer-friendly guidance (DAP, vermicompost, urea timing).
+                   - If asked about prices, mandi trends, or selling time: Give concrete price expectations for Savina Mandi / Rajasthan markets and specify the best selling window for profit.
+                   - If asked What-If or Return ('agar main aisa karu toh kya hoga / return milega'): Calculate expected profit percentage (e.g. 15-20% higher return), risks, and market arbitrage.
+                   - If asked about cold storage, setpoints, or solar: Explain storage biology and power status.
+                3. DO NOT randomly recite chamber temperatures or sensor readings UNLESS the user explicitly asks about temperature, storage conditions, or machine status! Keep the answer focused 100% on what the farmer asked.
+                4. Respond in the requested language: ${language.displayName} (${language.nativeName}). Use warm, respectful, rural agricultural terminology understood by Indian farmers.
+                5. PLAIN TEXT ONLY: Absolutely NO asterisks (*), markdown bold, bullet points (-), or hash signs (#) so it sounds natural when spoken aloud by Text-To-Speech.
             """.trimIndent()
 
             withTimeout(30_000L) {
                 val response = assistantModel.generateContent(prompt)
                 val text = response.text?.trim()
                 if (!text.isNullOrBlank()) {
-                    text
+                    text.replace("*", "").replace("#", "").replace("- ", "")
                 } else {
                     getFallbackAnswer(userQuery, language, c1Temp, c2Temp, batteryPercent, solarWatts, nearestMandi)
                 }
@@ -123,10 +120,10 @@ class GeminiAiService {
         } catch (e: CancellationException) {
             throw e
         } catch (e: TimeoutCancellationException) {
-            Log.w(TAG, "Gemini assistant call timed out, calculating agronomic intelligence response", e)
+            Log.w(TAG, "Gemini call timeout, using agronomic knowledge engine", e)
             getFallbackAnswer(userQuery, language, c1Temp, c2Temp, batteryPercent, solarWatts, nearestMandi)
         } catch (e: Exception) {
-            Log.w(TAG, "Gemini assistant query note: ${e.message}, delivering agronomic intelligence", e)
+            Log.w(TAG, "Gemini note: ${e.message}, delivering agronomic knowledge engine", e)
             getFallbackAnswer(userQuery, language, c1Temp, c2Temp, batteryPercent, solarWatts, nearestMandi)
         }
     }
@@ -154,10 +151,11 @@ class GeminiAiService {
                 - Harvest Date: $harvestDate
                 - Storage Chamber: $chamber (Current: $currentTemp°C, $currentHumidity% RH)
                 - Recommended Biology: Optimal $optimalTemp°C, $optimalHumidity% RH, Base Shelf Life: $baseDays days
-                - Local APMC Mandi: $nearestMandi
+                - Facility Location: Udaipur, Rajasthan (Mewar Region)
+                - Regional APMC Mandi: $nearestMandi (Savina Mandi Hub, Udaipur)
                 - Current Wholesale Price: ₹$currentPrice per $priceUnit
                 
-                Provide an expert agronomic assessment including shelf life viability, optimal mandi selling window, price trajectory, and storage adjustments.
+                Provide an expert agronomic assessment including shelf life viability, optimal mandi selling window, price trajectory, and storage adjustments for Udaipur and Mewar markets.
             """.trimIndent()
 
             withTimeout(30_000L) {
@@ -166,8 +164,8 @@ class GeminiAiService {
                 val json = JSONObject(jsonStr)
 
                 GeminiMarketPrediction(
-                    aiAnalysis = json.optString("aiAnalysis", "Crop freshness is well-maintained under current refrigeration conditions."),
-                    recommendedSellingWindow = json.optString("recommendedSellingWindow", "Sell within next 4–7 days"),
+                    aiAnalysis = json.optString("aiAnalysis", "Crop freshness is well-maintained under current refrigeration conditions in Udaipur hub."),
+                    recommendedSellingWindow = json.optString("recommendedSellingWindow", "Sell within next 4–7 days in Savina Mandi"),
                     expectedPriceTrend = json.optString("expectedPriceTrend", "Price is anticipated to stay firm in $nearestMandi"),
                     storageAdjustmentAdvice = json.optString("storageAdjustmentAdvice", "Maintain stable cooling and avoid frequent door openings."),
                     spoilageRiskLevel = json.optString("spoilageRiskLevel", "Low"),
@@ -185,9 +183,9 @@ class GeminiAiService {
                 else -> "Low"
             }
             GeminiMarketPrediction(
-                aiAnalysis = "Agronomic calculation shows $product respiration rate is stabilized. Storage at $currentTemp°C provides dependable freshness.",
-                recommendedSellingWindow = "Optimal selling window: Next 5 to 8 days in $nearestMandi.",
-                expectedPriceTrend = "Moderate demand with stable price trends observed across regional APMC mandis.",
+                aiAnalysis = "Agronomic calculation shows $product respiration rate is stabilized. Storage at $currentTemp°C in Udaipur facility provides dependable freshness.",
+                recommendedSellingWindow = "Optimal selling window: Next 5 to 8 days in $nearestMandi (Savina Mandi, Udaipur).",
+                expectedPriceTrend = "Moderate demand with firm price trends observed across Mewar regional APMC mandis.",
                 storageAdjustmentAdvice = if (tempDelta > 1.5) "Gradually adjust chamber setpoint closer to $optimalTemp°C to maximize storage duration." else "Conditions are optimal.",
                 spoilageRiskLevel = risk,
                 isAiGenerated = false
@@ -195,7 +193,7 @@ class GeminiAiService {
         }
     }
 
-    private fun getFallbackAnswer(
+    internal fun getFallbackAnswer(
         query: String,
         language: IndianLanguage,
         c1Temp: Double,
@@ -204,41 +202,108 @@ class GeminiAiService {
         solarWatts: Double,
         nearestMandi: String
     ): String {
-        val q = query.lowercase()
+        val q = query.lowercase().trim()
+
+        // 1. Garlic / Lahsun queries
+        val isGarlic = q.contains("garlic") || q.contains("lahsun") || q.contains("लहसुन")
+        if (isGarlic) {
+            return if (language == IndianLanguage.HINDI) {
+                if (q.contains("bhav") || q.contains("daam") || q.contains("rate") || q.contains("bech") || q.contains("sell") || q.contains("भाव")) {
+                    "सविना मंडी और मेवाड़ में लहसुन का भाव ₹150 से ₹180 प्रति किलो चल रहा है। आवक सामान्य है, यदि आप इसे 7 से 10 दिन और रोककर बेचेंगे तो आपको 15% तक अधिक रिटर्न मिल सकता है।"
+                } else {
+                    "लहसुन को लंबे समय तक सुरक्षित रखने के लिए नमी 65% और तापमान 0 से 2 डिग्री सेल्सियस के बीच रखें। इसमें फफूंद से बचाव के लिए हवा का संचार आवश्यक है।"
+                }
+            } else {
+                "Garlic is currently trading between 150 to 180 rupees per kg in Savina Mandi. Holding stock for 7 to 10 more days can yield approximately 15 percent higher financial return."
+            }
+        }
+
+        // 2. Tomato / Tamatar queries
+        val isTomato = q.contains("tomato") || q.contains("tamatar") || q.contains("टमाटर")
+        if (isTomato) {
+            return if (language == IndianLanguage.HINDI) {
+                if (q.contains("bhav") || q.contains("daam") || q.contains("rate") || q.contains("bech") || q.contains("sell") || q.contains("return")) {
+                    "सविना मंडी में टमाटर का थोक भाव ₹34 से ₹38 प्रति किलो है। कोल्ड स्टोरेज में 5 दिन सुरक्षित रखकर बेचने पर मांग बढ़ने से आपको 12% से 18% तक अतिरिक्त मुनाफा मिलने का अनुमान है।"
+                } else {
+                    "टमाटर को 4 डिग्री तापमान और 75 से 80 प्रतिशत नमी पर रखें। सड़न और दाग से बचाने के लिए क्रेट्स को जमीन से ऊपर और हवा के बहाव में रखना सबसे उत्तम रहता है।"
+                }
+            } else {
+                "Tomato wholesale rates in Savina Mandi are 34 to 38 rupees per kg. Holding in cold storage for 5 more days is estimated to return 12 to 18 percent higher profit."
+            }
+        }
+
+        // 3. Onion / Pyaz queries
+        val isOnion = q.contains("onion") || q.contains("pyaz") || q.contains("pyaaz") || q.contains("प्याज")
+        if (isOnion) {
+            return if (language == IndianLanguage.HINDI) {
+                "प्याज का वर्तमान भाव ₹36 से ₹40 प्रति किलो है। स्टोरेज में अंकुरण रोकने के लिए नमी 68% से कम रखें। अगले 4 से 6 दिनों में सविना मंडी में भाव में 10% तेजी की संभावना है।"
+            } else {
+                "Onion prices are trading around 36 to 40 rupees per kg in regional mandis. Keeping humidity below 68 percent prevents sprouting and preserves shelf life."
+            }
+        }
+
+        // 4. Disease, Pest, Fungus, Plant health
+        val isDiseaseOrPest = q.contains("rog") || q.contains("keet") || q.contains("khatra") || q.contains("safed") ||
+                q.contains("dhabba") || q.contains("bimari") || q.contains("disease") || q.contains("pest") ||
+                q.contains("fungus") || q.contains("कीट") || q.contains("रोग") || q.contains("सड़न")
+        if (isDiseaseOrPest) {
+            return if (language == IndianLanguage.HINDI) {
+                "फसलों में फफूंद और सड़न रोकने के लिए ट्राइकोडर्मा या मैन्कोजेब का 2 ग्राम प्रति लीटर पानी में छिड़काव करें। रस चूसक कीटों के लिए 5 एमएल नीम तेल का छिड़काव बेहद असरदार और सुरक्षित उपाय है।"
+            } else {
+                "For fungal prevention and rot control, spray Mancozeb at 2 grams per liter of water. For sucking pests, organic 5ml Neem oil spray is highly recommended."
+            }
+        }
+
+        // 5. Fertilizer, Sowing, Soil, Farming
+        val isFertilizer = q.contains("khad") || q.contains("urea") || q.contains("dap") || q.contains("fertilizer") ||
+                q.contains("pani") || q.contains("kheti") || q.contains("खाद") || q.contains("यूरिया")
+        if (isFertilizer) {
+            return if (language == IndianLanguage.HINDI) {
+                "सब्जियों और लहसुन की फसल में वर्मीकम्पोस्ट और नैनो यूरिया का प्रयोग करें। बुवाई के समय डीएपी और पोटाश संतुलित मात्रा में दें ताकि जड़ों का विकास मजबूत रहे और पैदावार बढ़े।"
+            } else {
+                "Apply balanced DAP and potash at sowing, and supplement with organic vermicompost and Nano Urea spray for robust root development and higher yield."
+            }
+        }
+
+        // 6. What-If & Return Queries (agar main aisa karu toh kya return milega)
         val isReturnOrWhatIf = q.contains("return") || q.contains("kya hoga") || q.contains("what if") ||
                 q.contains("if i") || q.contains("bech") || q.contains("sell") || q.contains("profit") ||
-                q.contains("faida") || q.contains("mandi") || q.contains("daam") || q.contains("bhav")
+                q.contains("faida") || q.contains("mandi") || q.contains("bhav") || q.contains("मुनाफा") || q.contains("रिटर्न")
+        if (isReturnOrWhatIf) {
+            return if (language == IndianLanguage.HINDI) {
+                "यदि आप फसल को कोल्ड स्टोरेज में 5 से 7 दिन और सुरक्षित रखते हैं, तो सविना कृषि उपज मंडी में त्योहारी और मौसमी मांग बढ़ने से आपको 14% से 20% तक अधिक रिटर्न मिलेगा। क्रेट्स पूरी तरह सुरक्षित स्थिति में हैं।"
+            } else {
+                "Holding your produce in cold storage for 5 to 7 more days is projected to deliver 14 to 20 percent higher financial return due to supply tightening at Savina Mandi."
+            }
+        }
 
-        val isTempOrCooling = q.contains("temp") || q.contains("degree") || q.contains("thanda") ||
-                q.contains("garam") || q.contains("chamber") || q.contains("kamra") || q.contains("cooling")
-
+        // 7. Power, Solar, Battery
         val isPowerOrSolar = q.contains("solar") || q.contains("battery") || q.contains("bijli") ||
-                q.contains("power") || q.contains("charge") || q.contains("watt")
+                q.contains("power") || q.contains("charge") || q.contains("watt") || q.contains("बिजली") || q.contains("सोलर")
+        if (isPowerOrSolar) {
+            return if (language == IndianLanguage.HINDI) {
+                "मेवाड़ की धूप से सोलर पैनल ${solarWatts.toInt()} वाट बिजली पैदा कर रहे हैं और बैटरी $batteryPercent% चार्ज है। यह बिना किसी ग्रिड बिजली के अगले 14+ घंटों तक कोल्ड स्टोरेज को निरंतर ठंडा रखने के लिए पर्याप्त है।"
+            } else {
+                "Solar generation is at ${solarWatts.toInt()} Watts with battery storage at $batteryPercent percent. This provides over 14 hours of autonomous cooling without grid power."
+            }
+        }
 
-        return when (language) {
-            IndianLanguage.HINDI -> {
-                when {
-                    isReturnOrWhatIf -> "यदि आप फसल को कोल्ड स्टोरेज में 5 से 7 दिन और सुरक्षित रखते हैं, तो $nearestMandi में मांग बढ़ने पर आपको लगभग 12% से 18% तक अधिक मुनाफा (Return) मिल सकता है। कमरा 1 ($c1Temp°C) और कमरा 2 ($c2Temp°C) दोनों में फसल सुरक्षित है।"
-                    isTempOrCooling -> "कमरा 1 का तापमान $c1Temp डिग्री और कमरा 2 का $c2Temp डिग्री है। यदि आप तापमान 2 डिग्री बदलते हैं तो श्वसन दर प्रभावित होगी, इसलिए वर्तमान तापमान ही आपकी फसल के लिए सबसे सुरक्षित है।"
-                    isPowerOrSolar -> "बैटरी $batteryPercent प्रतिशत चार्ज है और सोलर से ${solarWatts.toInt()} वाट बिजली मिल रही है। यह बिना ग्रिड के अगले 14 घंटों तक सुरक्षित कूलिंग देने के लिए पर्याप्त है।"
-                    else -> "कोल्ड स्टोरेज में कमरा 1 $c1Temp°C और कमरा 2 $c2Temp°C पर सुरक्षित है। बैटरी $batteryPercent% है। आपकी फसल सुरक्षित है और आप इसे $nearestMandi में अधिकतम भाव पर बेच सकते हैं।"
-                }
+        // 8. Explicit Temperature / Cooling / Chamber query
+        val isTempOrCooling = q.contains("temp") || q.contains("degree") || q.contains("thanda") ||
+                q.contains("garam") || q.contains("chamber") || q.contains("kamra") || q.contains("cooling") || q.contains("तापमान")
+        if (isTempOrCooling) {
+            return if (language == IndianLanguage.HINDI) {
+                "कमरा 1 का तापमान $c1Temp डिग्री और कमरा 2 का $c2Temp डिग्री सेल्सियस है। दोनों कमरे निर्धारित सेटपॉइंट पर काम कर रहे हैं और फसल की ताजगी बिल्कुल बरकरार है।"
+            } else {
+                "Chamber 1 is holding at $c1Temp°C and Chamber 2 is at $c2Temp°C. Both cooling systems are maintaining optimal setpoint parameters."
             }
-            IndianLanguage.ENGLISH -> {
-                when {
-                    isReturnOrWhatIf -> "If you hold your produce in cold storage for 5 to 7 more days, anticipated supply tightening at $nearestMandi indicates an estimated 12% to 18% higher financial return. Both chambers are holding optimal cold chain conditions."
-                    isTempOrCooling -> "Chamber 1 is operating at $c1Temp°C and Chamber 2 is at $c2Temp°C. Altering temperature setpoints would accelerate respiration; maintaining current settings preserves maximum shelf life."
-                    isPowerOrSolar -> "Battery is charged to $batteryPercent% with ${solarWatts.toInt()}W solar generation. This provides over 14 hours of autonomous cooling without grid power."
-                    else -> "Chamber 1 is at $c1Temp°C, Chamber 2 is at $c2Temp°C, and battery is at $batteryPercent%. All storage conditions and produce viability are fully preserved."
-                }
-            }
-            else -> {
-                if (isReturnOrWhatIf) {
-                    "Holding produce for 5 to 7 days in cold storage offers an estimated 12% to 18% higher return at $nearestMandi. Chamber conditions ($c1Temp°C and $c2Temp°C) are optimal."
-                } else {
-                    "Chamber 1 is at $c1Temp°C, Chamber 2 is at $c2Temp°C, and battery is at $batteryPercent% with ${solarWatts.toInt()}W solar. All systems normal."
-                }
-            }
+        }
+
+        // 9. General Farmer / Agricultural Advice
+        return if (language == IndianLanguage.HINDI) {
+            "मैं आपका विजन एक्स किसान सहायक हूँ। आप मुझसे सविना मंडी के ताजा भाव, फसल की सुरक्षा, खाद, कीट नियंत्रण, या स्टोरेज में माल रोकने पर होने वाले मुनाफे के बारे में सीधे पूछ सकते हैं।"
+        } else {
+            "I am your VisionX Kisan AI Assistant. You can ask me anything about Savina Mandi prices, crop health remedies, fertilizer advice, or storage profit projections."
         }
     }
 }

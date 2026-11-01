@@ -116,6 +116,12 @@ fun PredictionScreen(
     var isChamberDropdownExpanded by remember { mutableStateOf(false) }
 
     val mandiLocations = listOf(
+        "🏰 उदयपुर - सविना कृषि उपज मंडी (Udaipur - Savina Mandi)" to 0.96f,
+        "🌾 फतहनगर मंडी - उदयपुर (Fatehnagar Mandi - Udaipur)" to 0.94f,
+        "🍅 मावली / डबोक हब (Mavli & Dabok Hub - Udaipur)" to 0.95f,
+        "🌼 नाथद्वारा व राजसमंद मंडी (Nathdwara & Rajsamand)" to 0.97f,
+        "🧄 चित्तौड़गढ़ व बड़ी सादड़ी (Chittorgarh & Bari Sadri)" to 0.95f,
+        "🏜️ राजस्थान - जयपुर मुहाना मंडी (Jaipur - Muhana Mandi)" to 0.96f,
         "📍 राष्ट्रीय औसत (All India Average)" to 1.0f,
         "🏙️ दिल्ली - आज़ादपुर मंडी (Delhi - Azadpur)" to 1.08f,
         "🍇 महाराष्ट्र - लासलगाँव / नासिक (Maharashtra - Lasalgaon)" to 0.95f,
@@ -994,15 +1000,15 @@ fun PredictionScreen(
                 it.name.contains(currentLocationInfo?.nearestMandi ?: "", ignoreCase = true) ||
                 it.city.contains(currentLocationInfo?.cityName ?: "", ignoreCase = true)
             } ?: MandiCatalog.findNearestMandi(
-                currentLocationInfo?.latitude ?: 28.6139,
-                currentLocationInfo?.longitude ?: 77.2090
+                currentLocationInfo?.latitude ?: 24.5854,
+                currentLocationInfo?.longitude ?: 73.7125
             )
 
             GoogleMandiMapView(
                 mandi = targetMandi,
-                storageLat = currentLocationInfo?.latitude ?: 28.6139,
-                storageLng = currentLocationInfo?.longitude ?: 77.2090,
-                storageName = "GREENCOLD Storage Unit",
+                storageLat = currentLocationInfo?.latitude ?: 24.5854,
+                storageLng = currentLocationInfo?.longitude ?: 73.7125,
+                storageName = "VisionX Solar Cold Storage Hub - Dabok / Savina, Udaipur, Rajasthan",
                 produceName = selectedProduce.nameEnglish,
                 cropPrice = prediction.currentMarketPrice.toDouble(),
                 priceUnit = selectedProduce.unit

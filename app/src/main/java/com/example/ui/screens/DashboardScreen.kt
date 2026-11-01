@@ -91,7 +91,7 @@ fun DashboardScreen(
     onSpeakStatus: () -> Unit = {},
     onSpeakText: (String) -> Unit = {},
     onOpenVoiceAssistant: () -> Unit = {},
-    currentLocation: UserLocationInfo = UserLocationInfo("Delhi", "Delhi NCR", "Azadpur Mandi, Delhi", 1.08f),
+    currentLocation: UserLocationInfo = UserLocationInfo("Udaipur", "Rajasthan", "Krishi Upaj Mandi Samiti, Savina, Udaipur", 0.96f, 24.5854, 73.7125),
     onOpenLocationSheet: () -> Unit = {},
     onCheckWeatherConnection: () -> String = { "Weather Connection OK: Station Online" },
     modifier: Modifier = Modifier

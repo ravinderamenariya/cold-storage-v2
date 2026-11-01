@@ -37,4 +37,47 @@ class ExampleUnitTest {
         assertEquals(14, daysAtOptimal)
         assertEquals(6, daysAtWarm)
     }
+
+    @Test
+    fun geminiAiService_answersAgriculturalQuestionsWithoutForcedTemperatureEcho() {
+        val aiService = com.example.data.ai.GeminiAiService()
+
+        // Test garlic inquiry
+        val garlicAnswer = aiService.getFallbackAnswer(
+            query = "लहसुन का भाव और सविना मंडी में तेजी कब आएगी?",
+            language = com.example.util.IndianLanguage.HINDI,
+            c1Temp = 12.0,
+            c2Temp = 4.0,
+            batteryPercent = 78,
+            solarWatts = 450.0,
+            nearestMandi = "Krishi Upaj Mandi Samiti, Savina, Udaipur"
+        )
+        assertTrue("Garlic answer should mention garlic (लहसुन)", garlicAnswer.contains("लहसुन"))
+        assertTrue("Garlic answer should mention Savina mandi or Udaipur", garlicAnswer.contains("सविना") || garlicAnswer.contains("उदयपुर"))
+        assertTrue("Garlic answer should not simply recite room temperature", !garlicAnswer.startsWith("उदयपुर कोल्ड स्टोरेज में कमरा 1"))
+
+        // Test tomato return inquiry
+        val tomatoAnswer = aiService.getFallbackAnswer(
+            query = "टमाटर को 5 दिन बाद बेचें तो क्या return मिलेगा?",
+            language = com.example.util.IndianLanguage.HINDI,
+            c1Temp = 12.0,
+            c2Temp = 4.0,
+            batteryPercent = 78,
+            solarWatts = 450.0,
+            nearestMandi = "Krishi Upaj Mandi Samiti, Savina, Udaipur"
+        )
+        assertTrue("Tomato return should contain return/मुनाफा analysis", tomatoAnswer.contains("रिटर्न") || tomatoAnswer.contains("मुनाफा") || tomatoAnswer.contains("टमाटर"))
+
+        // Test pest and disease inquiry
+        val diseaseAnswer = aiService.getFallbackAnswer(
+            query = "फसलों में कीट और फफूंद का देसी इलाज क्या है?",
+            language = com.example.util.IndianLanguage.HINDI,
+            c1Temp = 12.0,
+            c2Temp = 4.0,
+            batteryPercent = 78,
+            solarWatts = 450.0,
+            nearestMandi = "Krishi Upaj Mandi Samiti, Savina, Udaipur"
+        )
+        assertTrue("Disease answer should recommend biological remedies", diseaseAnswer.contains("नीम") || diseaseAnswer.contains("ट्राइकोडर्मा") || diseaseAnswer.contains("फफूंद"))
+    }
 }

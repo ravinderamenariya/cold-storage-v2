@@ -83,9 +83,9 @@ enum class MapProvider(val displayName: String) {
 @Composable
 fun GoogleMandiMapView(
     mandi: MandiLocation,
-    storageLat: Double = 28.6139,
-    storageLng: Double = 77.2090,
-    storageName: String = "GREENCOLD Storage Unit",
+    storageLat: Double = 24.5854,
+    storageLng: Double = 73.7125,
+    storageName: String = "VisionX Solar Cold Storage Hub - Dabok / Savina, Udaipur, Rajasthan",
     produceName: String = "Produce",
     cropPrice: Double = 0.0,
     priceUnit: String = "kg",
@@ -390,7 +390,7 @@ fun GoogleMandiMapView(
                         border = BorderStroke(1.dp, VxTheme.border)
                     ) {
                         Text(
-                            text = "GREENCOLD",
+                            text = "VisionX Udaipur",
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,

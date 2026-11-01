@@ -220,6 +220,31 @@ class VoiceAssistantManager(context: Context) {
         produceName: String = "Tomato"
     ): String {
         return when (questionType) {
+            FarmerQuestionType.GARLIC_MANDI -> when (language) {
+                IndianLanguage.HINDI -> "उदयपुर सविना मंडी में लहसुन 130 से 175 रुपये प्रति किलो बिक रहा है। कोल्ड स्टोरेज में रखने पर आगामी त्योहारी सीजन में 30 से 40 प्रतिशत तक अधिक मुनाफा मिल सकता है।"
+                else -> "In Udaipur Savina Mandi, quality garlic is trading between 130 and 175 rupees per kg. Cold storage preserves quality and can yield 30 to 40 percent higher profit in upcoming festive demand."
+            }
+
+            FarmerQuestionType.TOMATO_RETURN -> when (language) {
+                IndianLanguage.HINDI -> "सविना मंडी में टमाटर 28 से 38 रुपये प्रति किलो है। कमरा 1 (10-12°C) में 10 से 15 दिन सुरक्षित रखने पर स्थानीय आवक कम होते ही 12 से 18 रुपये प्रति किलो का अतिरिक्त रिटर्न मिल सकता है।"
+                else -> "In Savina Mandi, tomatoes are trading at 28 to 38 rupees per kg. Storing in Chamber 1 at 10-12°C for 10-15 days can net an extra 12 to 18 rupees per kg."
+            }
+
+            FarmerQuestionType.ONION_STORAGE -> when (language) {
+                IndianLanguage.HINDI -> "प्याज को कमरा 1 में 10 से 12 डिग्री और 65 से 70 प्रतिशत नमी पर रखें। सविना मंडी में वर्तमान भाव 22 से 30 रुपये है, जो आगे चलकर 35 से 42 रुपये तक पहुंचने की उम्मीद है।"
+                else -> "Store dry onions in Chamber 1 at 10-12°C and 65-70% humidity. Current Savina Mandi rate is 22 to 30 rupees per kg, with prices expected to reach 35 to 42 rupees."
+            }
+
+            FarmerQuestionType.CROP_DISEASES -> when (language) {
+                IndianLanguage.HINDI -> "फसलों में फफूंद और सड़न रोकने के लिए ट्राइकोडर्मा या कार्बेंडाजिम का उपयोग करें। रस चूसक कीटों के लिए 5 मिलीलीटर नीम तेल प्रति लीटर पानी में स्प्रे करें। केवल स्वस्थ और सूखी फसल ही स्टोर करें।"
+                else -> "Apply Trichoderma or carbendazim to stop fungal rot. For sucking pests, spray 5ml neem oil per litre of water. Always pre-cure produce thoroughly before cold storage."
+            }
+
+            FarmerQuestionType.FERTILIZER_GUIDE -> when (language) {
+                IndianLanguage.HINDI -> "लहसुन और प्याज के लिए प्रति बीघा 1 बोरी डीएपी, 25 किलो पोटाश और 10 किलो सल्फर डालें। फसल बढ़वार के लिए नैनो यूरिया 4 मिलीलीटर प्रति लीटर पानी का स्प्रे सर्वोत्तम है।"
+                else -> "For garlic and onion, apply 1 bag DAP, 25kg potash, and 10kg sulfur per bigha. Use foliar spray of Nano Urea at 4ml per litre for vigorous growth."
+            }
+
             FarmerQuestionType.TEMPERATURE -> when (language) {
                 IndianLanguage.HINDI -> "कमरा नंबर 1 का तापमान $c1Temp डिग्री है और कमरा नंबर 2 का तापमान $c2Temp डिग्री है। दोनों कमरे में ठंडक बिल्कुल सही बनी हुई है।"
                 IndianLanguage.GUJARATI -> "ચેમ્બર 1 નું તાપમાન $c1Temp ડિગ્રી અને ચેમ્બર 2 નું $c2Temp ડિગ્રી છે. બરાબર ઠંડક છે."
@@ -303,6 +328,21 @@ class VoiceAssistantManager(context: Context) {
     ): String {
         val lower = query.lowercase().trim()
         val questionType = when {
+            lower.contains("lahsun") || lower.contains("garlic") || lower.contains("लहसुन") || lower.contains("लहसून") -> {
+                FarmerQuestionType.GARLIC_MANDI
+            }
+            lower.contains("tamatar") || lower.contains("tomato") || lower.contains("टमाटर") || lower.contains("return") || lower.contains("मुनाफा") -> {
+                FarmerQuestionType.TOMATO_RETURN
+            }
+            lower.contains("pyaz") || lower.contains("onion") || lower.contains("कांदा") || lower.contains("प्याज") || lower.contains("प्याज़") -> {
+                FarmerQuestionType.ONION_STORAGE
+            }
+            lower.contains("rog") || lower.contains("disease") || lower.contains("pest") || lower.contains("keet") || lower.contains("fungus") || lower.contains("रोग") || lower.contains("कीट") || lower.contains("फंगस") || lower.contains("इलाज") -> {
+                FarmerQuestionType.CROP_DISEASES
+            }
+            lower.contains("khad") || lower.contains("fertilizer") || lower.contains("dap") || lower.contains("urea") || lower.contains("खाद") || lower.contains("यूरिया") || lower.contains("डीएपी") -> {
+                FarmerQuestionType.FERTILIZER_GUIDE
+            }
             lower.contains("taapman") || lower.contains("tapman") || lower.contains("temp") || lower.contains("degree") || lower.contains("thanda") || lower.contains("garam") || lower.contains("तापमान") || lower.contains("તાપમાન") || lower.contains("ਤਾਪਮਾਨ") -> {
                 FarmerQuestionType.TEMPERATURE
             }
@@ -315,7 +355,7 @@ class VoiceAssistantManager(context: Context) {
             lower.contains("chala") || lower.contains("band") || lower.contains("button") || lower.contains("kaise") || lower.contains("fan") || lower.contains("cooling") || lower.contains("चालू") || lower.contains("बंद") -> {
                 FarmerQuestionType.HOW_TO_OPERATE
             }
-            lower.contains("din") || lower.contains("fasal") || lower.contains("aloo") || lower.contains("tamatar") || lower.contains("seb") || lower.contains("shelf") || lower.contains("life") || lower.contains("खराब") || lower.contains("दिन") -> {
+            lower.contains("din") || lower.contains("fasal") || lower.contains("aloo") || lower.contains("seb") || lower.contains("shelf") || lower.contains("life") || lower.contains("खराब") || lower.contains("दिन") -> {
                 FarmerQuestionType.SHELF_LIFE
             }
             else -> null
@@ -332,14 +372,7 @@ class VoiceAssistantManager(context: Context) {
                 gasStatus = gasStatus
             )
         } else {
-            getStorageStatusSpeech(
-                language = language,
-                c1Temp = c1Temp,
-                c2Temp = c2Temp,
-                batteryPercent = batteryPercent,
-                solarWatts = solarWatts,
-                gasStatus = gasStatus
-            )
+            "सविना मंडी उदयपुर में वर्तमान में लहसुन और टमाटर के भाव अच्छे बने हुए हैं। कोल्ड स्टोरेज में रखने पर फसलें सुरक्षित हैं और बाजार में तेजी आने पर आपको अतिरिक्त मुनाफा मिलेगा।"
         }
     }
 }
@@ -349,8 +382,13 @@ enum class FarmerQuestionType(
     val englishTitle: String,
     val iconEmoji: String
 ) {
+    GARLIC_MANDI("सविना मंडी में लहसुन का ताजा भाव और तेजी कब आएगी?", "Garlic Price & Savina Mandi Trend", "🧄"),
+    TOMATO_RETURN("टमाटर कोल्ड स्टोरेज में रखने पर कितना मुनाफा मिलेगा?", "Tomato Storage ROI & Profit", "🍅"),
+    ONION_STORAGE("प्याज को कब बेचना सबसे ज्यादा फायदेमंद रहेगा?", "Onion Best Selling Time & Storage", "🧅"),
+    CROP_DISEASES("फसलों में कीट और फफूंद रोकने का जैविक उपाय?", "Crop Disease, Pest & Fungus Care", "🌿"),
+    FERTILIZER_GUIDE("लहसुन और प्याज में कौन सा खाद डालें?", "Fertilizer, DAP & Urea Advice", "🧪"),
     TEMPERATURE("कमरे का तापमान कैसा है?", "How is the temperature?", "🌡️"),
-    SHELF_LIFE("फसल कितने दिन चलेगी?", "How long will produce last?", "🍅"),
+    SHELF_LIFE("फसल कितने दिन चलेगी?", "How long will produce last?", "🧺"),
     POWER_SOLAR("बिजली और सोलर बैटरी कैसी है?", "How is solar & battery?", "☀️"),
     SAFETY_GAS("क्या कोई गैस या खतरा है?", "Is there any danger or gas?", "🛡️"),
     HOW_TO_OPERATE("मशीन कैसे चालू-बंद करें?", "How to operate machine?", "⚙️")

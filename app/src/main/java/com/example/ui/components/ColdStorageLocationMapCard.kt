@@ -73,7 +73,7 @@ import com.example.util.UserLocationInfo
 @Composable
 fun ColdStorageLocationMapCard(
     currentLocation: UserLocationInfo,
-    storageName: String = "GREENCOLD Smart Storage Unit",
+    storageName: String = "VisionX Solar Cold Storage Hub - Dabok / Savina, Udaipur, Rajasthan",
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -150,7 +150,7 @@ fun ColdStorageLocationMapCard(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "मेरा कोल्ड स्टोरेज कहाँ है (Live Location)",
+                            text = "उदयपुर मेवाड़ कोल्ड स्टोरेज लोकेशन (Udaipur Hub)",
                             fontSize = 11.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -209,40 +209,64 @@ fun ColdStorageLocationMapCard(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(140.dp)
+                    .height(150.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(if (MaterialTheme.colorScheme.surface.hashCode() % 2 == 0) Color(0xFF1E293B) else Color(0xFFE2E8F0))
                     .border(1.dp, VxTheme.border, RoundedCornerShape(12.dp))
             ) {
                 val lineColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
                 val primaryColor = VxTheme.primaryBlue
+                val secondaryColor = VxTheme.emerald
 
                 Canvas(modifier = Modifier.matchParentSize()) {
                     val w = size.width
                     val h = size.height
 
-                    // Road network grid simulation
+                    // Mewar regional highway grid (NH-27 & NH-58 Udaipur bypass)
                     drawLine(lineColor, Offset(0f, h * 0.35f), Offset(w, h * 0.35f), strokeWidth = 2f)
                     drawLine(lineColor, Offset(0f, h * 0.65f), Offset(w, h * 0.65f), strokeWidth = 2f)
                     drawLine(lineColor, Offset(w * 0.25f, 0f), Offset(w * 0.25f, h), strokeWidth = 2f)
                     drawLine(lineColor, Offset(w * 0.70f, 0f), Offset(w * 0.70f, h), strokeWidth = 2f)
 
-                    // Connecting transit line to regional road
-                    val center = Offset(w * 0.5f, h * 0.5f)
-                    val mandiPoint = Offset(w * 0.85f, h * 0.25f)
-                    val pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 8f), 0f)
+                    val center = Offset(w * 0.45f, h * 0.5f)
+                    val savinaPoint = Offset(w * 0.22f, h * 0.75f)
+                    val dabokPoint = Offset(w * 0.75f, h * 0.4f)
+                    val fatehnagarPoint = Offset(w * 0.88f, h * 0.18f)
 
+                    val dashEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 6f), 0f)
+
+                    // Corridor to Savina Mandi
                     drawLine(
-                        color = primaryColor.copy(alpha = 0.7f),
+                        color = primaryColor.copy(alpha = 0.8f),
                         start = center,
-                        end = mandiPoint,
+                        end = savinaPoint,
                         strokeWidth = 3.dp.toPx(),
-                        pathEffect = pathEffect,
+                        pathEffect = dashEffect,
+                        cap = StrokeCap.Round
+                    )
+
+                    // Corridor to Dabok Collection Hub
+                    drawLine(
+                        color = secondaryColor.copy(alpha = 0.8f),
+                        start = center,
+                        end = dabokPoint,
+                        strokeWidth = 3.dp.toPx(),
+                        pathEffect = dashEffect,
+                        cap = StrokeCap.Round
+                    )
+
+                    // Corridor to Fatehnagar Mandi
+                    drawLine(
+                        color = Color(0xFFF59E0B).copy(alpha = 0.8f),
+                        start = center,
+                        end = fatehnagarPoint,
+                        strokeWidth = 2.dp.toPx(),
+                        pathEffect = dashEffect,
                         cap = StrokeCap.Round
                     )
                 }
 
-                // Center Pin: Cold Storage with Radar Wave
+                // Center Pin: Cold Storage Hub with Radar Wave
                 Box(
                     modifier = Modifier.align(Alignment.Center),
                     contentAlignment = Alignment.Center
@@ -283,20 +307,42 @@ fun ColdStorageLocationMapCard(
                 ) {
                     Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
                         Text(
-                            text = "GREENCOLD Unit 01",
+                            text = "VisionX Solar Hub (Dabok/Savina)",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "${String.format("%.4f", currentLocation.latitude)}°N, ${String.format("%.4f", currentLocation.longitude)}°E",
+                            text = "${String.format("%.4f", currentLocation.latitude)}°N, ${String.format("%.4f", currentLocation.longitude)}°E (Udaipur)",
                             fontSize = 9.sp,
                             color = VxTheme.primaryBlue
                         )
                     }
                 }
 
-                // Bottom-Right Badge: Nearest Mandi Distance
+                // Bottom-Left Marker: Savina Mandi Pin
+                Surface(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(8.dp),
+                    shape = RoundedCornerShape(6.dp),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                    border = BorderStroke(1.dp, VxTheme.primaryBlue.copy(alpha = 0.5f))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "📍 सविना मंडी (~6.8 km)",
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = VxTheme.primaryBlue
+                        )
+                    }
+                }
+
+                // Bottom-Right Marker: Nearest Mandi Distance
                 Surface(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
@@ -328,6 +374,25 @@ fun ColdStorageLocationMapCard(
 
             Spacer(modifier = Modifier.height(10.dp))
 
+            // Mewar Regional Collection Centers & Mandi Strip
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(VxTheme.surfaceSubtle)
+                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "🌱 सविना: 6.8km", fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = VxTheme.primaryBlue)
+                Text(text = "•", fontSize = 10.sp, color = MaterialTheme.colorScheme.outline)
+                Text(text = "📦 डबोक हब: 18km", fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = VxTheme.emeraldDark)
+                Text(text = "•", fontSize = 10.sp, color = MaterialTheme.colorScheme.outline)
+                Text(text = "🌾 फतहनगर: 48km", fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFFD97706))
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
             // Address & Facility Info Row
             Surface(
                 shape = RoundedCornerShape(10.dp),
@@ -348,7 +413,7 @@ fun ColdStorageLocationMapCard(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Facility: ${currentLocation.cityName}, ${currentLocation.stateName} • Mandi Hub: ${currentLocation.nearestMandi}",
+                        text = "Facility: ${currentLocation.cityName}, ${currentLocation.stateName} (Mewar) • Hub: ${currentLocation.nearestMandi}",
                         fontSize = 11.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

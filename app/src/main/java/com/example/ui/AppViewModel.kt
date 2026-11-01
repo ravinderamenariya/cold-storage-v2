@@ -129,7 +129,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun setLocationManually(cityName: String, stateName: String, nearestMandi: String, multiplier: Float, lat: Double = 28.6139, lng: Double = 77.2090) {
+    fun setLocationManually(cityName: String, stateName: String, nearestMandi: String, multiplier: Float, lat: Double = 24.5854, lng: Double = 73.7125) {
         locationService.setLocation(cityName, stateName, nearestMandi, multiplier, lat, lng)
     }
 
@@ -156,7 +156,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val _chatMessages = MutableStateFlow<List<AiChatMessage>>(
         listOf(
             AiChatMessage(
-                text = "नमस्ते! मैं आपका GREENCOLD किसान AI सहायक हूँ (Powered by Gemini 3.8 Flash)। आप कोल्ड स्टोरेज तापमान, क्या-अगर सवाल (जैसे: अगर 5 दिन बाद बेचें तो क्या return मिलेगा?), या फसल सुझाव के बारे में सीधे पूछ सकते हैं।",
+                text = "नमस्ते! मैं आपका GREENCOLD किसान AI और कृषि विशेषज्ञ हूँ (Gemini 3.8 Flash)। उदयपुर सविना मंडी भाव, लहसुन और टमाटर का रिटर्न, फसल रोग व कीट उपचार, या खाद की मात्रा के बारे में मुझसे सीधे आवाज़ में पूछें।",
                 isUser = false,
                 isAiGenerated = true
             )

@@ -20,6 +20,94 @@ data class MandiLocation(
 object MandiCatalog {
     val allMandis = listOf(
         MandiLocation(
+            id = "mandi_udaipur_savina",
+            name = "Krishi Upaj Mandi Samiti, Savina, Udaipur",
+            city = "Udaipur",
+            state = "Rajasthan",
+            latitude = 24.5518,
+            longitude = 73.7259,
+            specialtyProduce = "Tomato, Onion, Garlic, Green Chilli, Seasonal F&V",
+            priceMultiplier = 0.96f,
+            address = "Krishi Upaj Mandi Samiti, Savina Sector 9, Udaipur, Rajasthan 313002"
+        ),
+        MandiLocation(
+            id = "mandi_udaipur_pratapnagar",
+            name = "Pratapnagar Sub-Mandi, Udaipur",
+            city = "Udaipur",
+            state = "Rajasthan",
+            latitude = 24.5942,
+            longitude = 73.7441,
+            specialtyProduce = "Vegetables, Grain, Fodder, Local Produce",
+            priceMultiplier = 0.95f,
+            address = "Pratap Nagar Bypass, National Highway 27, Udaipur, Rajasthan"
+        ),
+        MandiLocation(
+            id = "mandi_fatehnagar",
+            name = "Fatehnagar Krishi Upaj Mandi",
+            city = "Fatehnagar",
+            state = "Rajasthan",
+            latitude = 24.8631,
+            longitude = 74.0722,
+            specialtyProduce = "Garlic, Maize, Wheat, Mustard, Onion",
+            priceMultiplier = 0.94f,
+            address = "APMC Mandi Yard, Fatehnagar, Mavli Tehsil, Udaipur, Rajasthan"
+        ),
+        MandiLocation(
+            id = "mandi_mavli",
+            name = "Mavli Krishi Upaj Mandi",
+            city = "Mavli",
+            state = "Rajasthan",
+            latitude = 24.7891,
+            longitude = 73.9875,
+            specialtyProduce = "Maize, Mustard, Garlic, Gram, Tomato",
+            priceMultiplier = 0.94f,
+            address = "Railway Station Road, Mavli, Udaipur District, Rajasthan"
+        ),
+        MandiLocation(
+            id = "mandi_dabok_vallabhnagar",
+            name = "Dabok / Vallabhnagar Market Hub",
+            city = "Dabok",
+            state = "Rajasthan",
+            latitude = 24.6186,
+            longitude = 73.8821,
+            specialtyProduce = "Tomato, Chilli, Seasonal Vegetables, Agri Hub",
+            priceMultiplier = 0.95f,
+            address = "Near Maharana Pratap Airport / Vallabhnagar Road, Dabok, Udaipur"
+        ),
+        MandiLocation(
+            id = "mandi_nathdwara_rajsamand",
+            name = "Nathdwara & Rajsamand Krishi Mandi",
+            city = "Nathdwara",
+            state = "Rajasthan",
+            latitude = 24.9312,
+            longitude = 73.8219,
+            specialtyProduce = "Vegetables, Flowers, Marigold, Rose, Mustard",
+            priceMultiplier = 0.97f,
+            address = "NH-58 Market Yard, Nathdwara, Rajsamand District, Rajasthan"
+        ),
+        MandiLocation(
+            id = "mandi_chittorgarh_barisadri",
+            name = "Chittorgarh & Bari Sadri Krishi Upaj Mandi",
+            city = "Chittorgarh",
+            state = "Rajasthan",
+            latitude = 24.8887,
+            longitude = 74.6269,
+            specialtyProduce = "Garlic, Opium Seeds, Mustard, Wheat, Coriander, Chilli",
+            priceMultiplier = 0.95f,
+            address = "Chanderiya APMC Mandi Complex, Chittorgarh, Mewar Region, Rajasthan"
+        ),
+        MandiLocation(
+            id = "mandi_jaipur",
+            name = "Muhana Terminal Mandi",
+            city = "Jaipur",
+            state = "Rajasthan",
+            latitude = 26.7865,
+            longitude = 75.7622,
+            specialtyProduce = "Onion, Mustard, Pomegranate, Tomato",
+            priceMultiplier = 0.96f,
+            address = "Muhana Mandi Rd, Sanganer, Jaipur, Rajasthan"
+        ),
+        MandiLocation(
             id = "mandi_delhi_azadpur",
             name = "Azadpur APMC Mandi",
             city = "New Delhi",

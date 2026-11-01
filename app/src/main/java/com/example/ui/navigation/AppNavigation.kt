@@ -239,6 +239,7 @@ fun AppNavigation(
                         onAskFarmerQuestion = { viewModel.askFarmerQuestion(it) },
                         onAskVoiceQuery = { viewModel.askVoiceQuery(it) },
                         onStopSpeaking = { viewModel.stopSpeaking() },
+                        onSpeakText = { viewModel.speakText(it) },
                         onBack = { viewModel.navigateTo(AppDestination.HOME) }
                     )
                 }

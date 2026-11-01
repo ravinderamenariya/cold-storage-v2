@@ -42,9 +42,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.VolumeUp
@@ -56,6 +58,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -79,6 +82,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import com.example.ui.AiChatMessage
 import com.example.ui.components.VisionXHeader
@@ -99,6 +103,7 @@ fun VoiceAssistantScreen(
     onAskFarmerQuestion: (FarmerQuestionType) -> Unit,
     onAskVoiceQuery: (String) -> Unit,
     onStopSpeaking: () -> Unit,
+    onSpeakText: (String) -> Unit = {},
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -106,6 +111,7 @@ fun VoiceAssistantScreen(
     var queryText by remember { mutableStateOf("") }
     var isListening by remember { mutableStateOf(false) }
     var speechError by remember { mutableStateOf<String?>(null) }
+    var showDirectVoiceDialog by remember { mutableStateOf(false) }
 
     // Android SpeechRecognizer
     val speechRecognizer = remember {
@@ -124,12 +130,14 @@ fun VoiceAssistantScreen(
 
     fun startListening() {
         if (speechRecognizer == null) {
-            speechError = "Speech recognition is not supported on this device."
+            // If device/browser has no SpeechRecognizer, open interactive voice query dialog
+            showDirectVoiceDialog = true
             return
         }
 
         speechError = null
         isListening = true
+        showDirectVoiceDialog = true
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, selectedLanguage.localeTag)
@@ -148,15 +156,16 @@ fun VoiceAssistantScreen(
             override fun onError(error: Int) {
                 isListening = false
                 speechError = when (error) {
-                    SpeechRecognizer.ERROR_NO_MATCH -> "No speech recognized. Please try again."
-                    SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Network issue in voice recognition."
-                    SpeechRecognizer.ERROR_AUDIO -> "Audio recording error."
-                    else -> "Voice recognition error (code $error)."
+                    SpeechRecognizer.ERROR_NO_MATCH -> "No speech recognized. Please select or speak your question below."
+                    SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Network issue. Please select question below."
+                    SpeechRecognizer.ERROR_AUDIO -> "Audio recording error. Please select question below."
+                    else -> "Voice recognition note (code $error). Select question below."
                 }
             }
 
             override fun onResults(results: Bundle?) {
                 isListening = false
+                showDirectVoiceDialog = false
                 val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 if (!matches.isNullOrEmpty()) {
                     val recognized = matches[0]
@@ -173,7 +182,7 @@ fun VoiceAssistantScreen(
             speechRecognizer.startListening(intent)
         } catch (e: Exception) {
             isListening = false
-            speechError = "Could not start voice recognition: ${e.message}"
+            speechError = "Speech recognizer active. You can speak or select directly below."
         }
     }
 
@@ -190,7 +199,8 @@ fun VoiceAssistantScreen(
         if (isGranted) {
             startListening()
         } else {
-            speechError = "Audio permission is required to use the voice microphone."
+            // Permission denied, still open dialog for easy prompt tap & voice reply
+            showDirectVoiceDialog = true
         }
     }
 
@@ -217,13 +227,201 @@ fun VoiceAssistantScreen(
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val pulseScale by infiniteTransition.animateFloat(
         initialValue = 1f,
-        targetValue = 1.14f,
+        targetValue = 1.15f,
         animationSpec = infiniteRepeatable(
-            animation = tween(800, easing = FastOutSlowInEasing),
+            animation = tween(750, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "pulseScale"
     )
+
+    // Direct Voice Recording & Prompt Dialog
+    if (showDirectVoiceDialog) {
+        Dialog(onDismissRequest = {
+            stopListening()
+            showDirectVoiceDialog = false
+        }) {
+            Surface(
+                shape = RoundedCornerShape(24.dp),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 6.dp,
+                border = BorderStroke(2.dp, VxTheme.primaryBlue.copy(alpha = 0.5f)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                    .testTag("direct_voice_recording_dialog")
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.GraphicEq,
+                                contentDescription = null,
+                                tint = VxTheme.primaryBlue,
+                                modifier = Modifier.size(22.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "किसान आवाज़ रिकॉर्डर",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        IconButton(
+                            onClick = {
+                                stopListening()
+                                showDirectVoiceDialog = false
+                            },
+                            modifier = Modifier.size(28.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Close",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // Animated Mic circle
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(72.dp)
+                            .scale(if (isListening) pulseScale else 1f)
+                            .clip(CircleShape)
+                            .background(if (isListening) VxTheme.errorRed else VxTheme.primaryBlue)
+                            .clickable {
+                                if (isListening) stopListening() else startListening()
+                            }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Mic,
+                            contentDescription = "Mic",
+                            tint = Color.White,
+                            modifier = Modifier.size(36.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Text(
+                        text = if (isListening) "बोलिए... सुन रहे हैं (Listening...)" else "सीधे आवाज़ से सवाल पूछें",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isListening) VxTheme.errorRed else VxTheme.primaryBlue
+                    )
+
+                    Text(
+                        text = "नीचे दिए गए सवाल पर टैप करके तुरंत बोलें और Gemini से आवाज़ में उत्तर सुनें:",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
+                    )
+
+                    // Spoken Quick Prompts in Dialog
+                    val directVoicePrompts = listOf(
+                        "🧄 सविना मंडी में लहसुन का भाव और तेजी कब आएगी?",
+                        "🍅 टमाटर को कोल्ड स्टोरेज में रखने पर कितना मुनाफा मिलेगा?",
+                        "🧅 प्याज को कब बेचना सबसे ज्यादा फायदेमंद रहेगा?",
+                        "🌿 फसलों में कीट और फफूंद रोकने का जैविक उपाय?",
+                        "🧪 लहसुन और प्याज में कौन सा खाद डालें?",
+                        "☀️ सोलर पावर कम होने पर बैकअप कितना चलेगा?",
+                        "🌡️ कमरा 1 और कमरा 2 का तापमान कैसा है?"
+                    )
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(180.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        items(directVoicePrompts) { prompt ->
+                            Surface(
+                                onClick = {
+                                    stopListening()
+                                    showDirectVoiceDialog = false
+                                    onAskVoiceQuery(prompt)
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                color = VxTheme.surfaceBlue,
+                                border = BorderStroke(1.dp, VxTheme.primaryBlue.copy(alpha = 0.35f)),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(10.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.VolumeUp,
+                                        contentDescription = null,
+                                        tint = VxTheme.primaryBlue,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = prompt,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = VxTheme.primaryBlue
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Text fallback input inside dialog
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            value = queryText,
+                            onValueChange = { queryText = it },
+                            placeholder = { Text("या यहाँ अपना सवाल लिखें...", fontSize = 12.sp) },
+                            singleLine = true,
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier.weight(1f)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        IconButton(
+                            onClick = {
+                                if (queryText.isNotBlank()) {
+                                    val text = queryText
+                                    queryText = ""
+                                    stopListening()
+                                    showDirectVoiceDialog = false
+                                    onAskVoiceQuery(text)
+                                }
+                            },
+                            modifier = Modifier
+                                .size(44.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(VxTheme.primaryBlue)
+                        ) {
+                            Icon(imageVector = Icons.Default.Send, contentDescription = "Send", tint = Color.White)
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -302,31 +500,63 @@ fun VoiceAssistantScreen(
                     }
                 }
 
-                // Gemini AI Status Pill
+                // Gemini AI Status Pill & Active Speech Banner
                 item {
-                    Surface(
-                        shape = RoundedCornerShape(20.dp),
-                        color = VxTheme.purple.copy(alpha = 0.12f),
-                        border = BorderStroke(1.dp, VxTheme.purple.copy(alpha = 0.35f)),
-                        modifier = Modifier.padding(vertical = 2.dp)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                        Surface(
+                            shape = RoundedCornerShape(20.dp),
+                            color = VxTheme.purple.copy(alpha = 0.12f),
+                            border = BorderStroke(1.dp, VxTheme.purple.copy(alpha = 0.35f))
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.AutoAwesome,
-                                contentDescription = "Gemini",
-                                tint = VxTheme.purple,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = "Connected to Gemini 3.8 Flash AI Model",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = VxTheme.purple
-                            )
+                            Row(
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.AutoAwesome,
+                                    contentDescription = "Gemini",
+                                    tint = VxTheme.purple,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "Gemini 3.8 Flash कृषि विशेषज्ञ Active",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = VxTheme.purple
+                                )
+                            }
+                        }
+
+                        if (isSpeaking) {
+                            Surface(
+                                shape = RoundedCornerShape(16.dp),
+                                color = VxTheme.success.copy(alpha = 0.15f),
+                                border = BorderStroke(1.dp, VxTheme.success)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.VolumeUp,
+                                        contentDescription = null,
+                                        tint = VxTheme.success,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "बोल रहा है (Speaking)",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = VxTheme.success
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -381,8 +611,8 @@ fun VoiceAssistantScreen(
                             Text(
                                 text = when {
                                     isListening -> "सुन रहे हैं... बोलिए (Listening...)"
-                                    isSpeaking -> AppTranslations.get("speaking", selectedLanguage)
-                                    else -> AppTranslations.get("tap_to_speak", selectedLanguage)
+                                    isSpeaking -> "Gemini बोल रहा है... (Speaking Aloud)"
+                                    else -> "माइक दबाकर सीधे बोलें (Tap Mic to Speak)"
                                 },
                                 fontSize = 17.sp,
                                 fontWeight = FontWeight.Bold,
@@ -391,18 +621,44 @@ fun VoiceAssistantScreen(
                             )
 
                             Text(
-                                text = "कोल्ड स्टोरेज, क्या-अगर सवाल या फसल रिटर्न के बारे में सीधे पूछें",
+                                text = "सविना मंडी भाव, लहसुन, टमाटर रिटर्न, फसल रोग व सोलर बैकअप पर सीधे बात करें",
                                 fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.padding(top = 4.dp)
                             )
 
+                            // Direct Voice Dialog trigger button
+                            Button(
+                                onClick = { showDirectVoiceDialog = true },
+                                colors = ButtonDefaults.buttonColors(containerColor = VxTheme.surfaceBlue),
+                                border = BorderStroke(1.dp, VxTheme.primaryBlue),
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 12.dp)
+                                    .testTag("open_direct_voice_dialog_button")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.GraphicEq,
+                                    contentDescription = null,
+                                    tint = VxTheme.primaryBlue,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "🎙️ आवाज़ से पूछें (Open Voice Assistant)",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = VxTheme.primaryBlue
+                                )
+                            }
+
                             // Stop Speaking / Read Status buttons
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(top = 14.dp),
+                                    .padding(top = 10.dp),
                                 horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
                                 Button(
@@ -413,7 +669,7 @@ fun VoiceAssistantScreen(
                                 ) {
                                     Icon(imageVector = Icons.Default.VolumeUp, contentDescription = null, modifier = Modifier.size(18.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text(text = AppTranslations.get("speak_all", selectedLanguage), fontSize = 13.sp)
+                                    Text(text = "स्टोरेज व मंडी स्टेटस सुनें", fontSize = 13.sp)
                                 }
 
                                 if (isSpeaking) {
@@ -424,7 +680,7 @@ fun VoiceAssistantScreen(
                                     ) {
                                         Icon(imageVector = Icons.Default.Stop, contentDescription = null, modifier = Modifier.size(18.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text(text = AppTranslations.get("stop_speech", selectedLanguage), fontSize = 12.sp)
+                                        Text(text = "आवाज़ रोकें", fontSize = 12.sp)
                                     }
                                 }
                             }
@@ -432,8 +688,9 @@ fun VoiceAssistantScreen(
                             if (speechError != null) {
                                 Text(
                                     text = speechError ?: "",
-                                    color = VxTheme.errorRed,
+                                    color = VxTheme.primaryBlue,
                                     fontSize = 12.sp,
+                                    textAlign = TextAlign.Center,
                                     modifier = Modifier.padding(top = 8.dp)
                                 )
                             }
@@ -441,11 +698,11 @@ fun VoiceAssistantScreen(
                     }
                 }
 
-                // 3. What-If & Return Quick Prompt Chips
+                // 3. What-If & Mandi Return Quick Prompt Chips
                 item {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Text(
-                            text = "💡 क्या-अगर सवाल (Ask What-If & Return Scenarios):",
+                            text = "💡 क्या-अगर और मंडी सवाल (Mandi & Return Scenarios):",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -456,10 +713,12 @@ fun VoiceAssistantScreen(
                             contentPadding = PaddingValues(horizontal = 2.dp)
                         ) {
                             val whatIfPrompts = listOf(
-                                "अगर 5 दिन बाद बेचें तो क्या return मिलेगा?",
-                                "कमरा 1 का तापमान 8°C करने पर क्या होगा?",
-                                "आलू को कब बेचना सबसे फायदेमंद रहेगा?",
-                                "सोलर पावर कम होने पर कूलिंग कितनी देर चलेगी?"
+                                "🧄 सविना मंडी में लहसुन का ताजा भाव और तेजी कब आएगी?",
+                                "🍅 टमाटर को कोल्ड स्टोरेज में रखने पर कितना मुनाफा मिलेगा?",
+                                "🧅 प्याज को कब बेचना सबसे ज्यादा फायदेमंद रहेगा?",
+                                "🌿 फसलों में कीट और फफूंद रोकने का जैविक उपाय?",
+                                "🧪 लहसुन और प्याज में कौन सा खाद डालें?",
+                                "☀️ सोलर पावर कम होने पर बैकअप कितना चलेगा?"
                             )
                             items(whatIfPrompts) { prompt ->
                                 Surface(
@@ -538,23 +797,42 @@ fun VoiceAssistantScreen(
                                 shape = RoundedCornerShape(topStart = 4.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 16.dp),
                                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                 border = BorderStroke(1.dp, VxTheme.purple.copy(alpha = 0.35f)),
-                                modifier = Modifier.fillMaxWidth(0.92f)
+                                modifier = Modifier.fillMaxWidth(0.95f)
                             ) {
                                 Column(modifier = Modifier.padding(12.dp)) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            imageVector = Icons.Default.AutoAwesome,
-                                            contentDescription = null,
-                                            tint = VxTheme.purple,
-                                            modifier = Modifier.size(15.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Text(
-                                            text = "GREENCOLD Kisan AI (Gemini 3.8 Flash)",
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = VxTheme.purple
-                                        )
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(
+                                                imageVector = Icons.Default.AutoAwesome,
+                                                contentDescription = null,
+                                                tint = VxTheme.purple,
+                                                modifier = Modifier.size(15.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Text(
+                                                text = "GREENCOLD Kisan AI (Gemini 3.8 Flash)",
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = VxTheme.purple
+                                            )
+                                        }
+
+                                        // Listen again button on every response
+                                        IconButton(
+                                            onClick = { onSpeakText(msg.text) },
+                                            modifier = Modifier.size(28.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.VolumeUp,
+                                                contentDescription = "Listen Aloud",
+                                                tint = VxTheme.primaryBlue,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
                                     }
                                     Spacer(modifier = Modifier.height(6.dp))
                                     Text(
@@ -576,7 +854,7 @@ fun VoiceAssistantScreen(
                             shape = RoundedCornerShape(12.dp),
                             colors = CardDefaults.cardColors(containerColor = VxTheme.surfaceBlue),
                             border = BorderStroke(1.dp, VxTheme.primaryBlue.copy(alpha = 0.4f)),
-                            modifier = Modifier.fillMaxWidth(0.88f)
+                            modifier = Modifier.fillMaxWidth(0.92f)
                         ) {
                             Row(
                                 modifier = Modifier.padding(12.dp),
@@ -589,7 +867,7 @@ fun VoiceAssistantScreen(
                                 )
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Text(
-                                    text = "Gemini 3.8 Flash विश्लेषण कर रहा है... (Calculating return & advice)",
+                                    text = "Gemini 3.8 Flash कृषि व मंडी विश्लेषण कर रहा है...",
                                     fontSize = 12.sp,
                                     color = VxTheme.primaryBlue,
                                     fontWeight = FontWeight.Medium
@@ -602,7 +880,7 @@ fun VoiceAssistantScreen(
                 // 5. One-Tap Quick Questions for Farmers / Illiterate Users
                 item {
                     Text(
-                        text = "⚡ ${AppTranslations.get("quick_questions", selectedLanguage)}",
+                        text = "⚡ किसान त्वरित प्रश्न (One-Tap Agricultural Voice Questions):",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -681,7 +959,7 @@ fun VoiceAssistantScreen(
                         OutlinedTextField(
                             value = queryText,
                             onValueChange = { queryText = it },
-                            placeholder = { Text("जैसे: अगर 5 दिन बाद बेचें तो क्या return मिलेगा?", fontSize = 12.sp) },
+                            placeholder = { Text("जैसे: सविना मंडी में लहसुन का भाव क्या है?", fontSize = 12.sp) },
                             singleLine = true,
                             shape = RoundedCornerShape(10.dp),
                             colors = OutlinedTextFieldDefaults.colors(
