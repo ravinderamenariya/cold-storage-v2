@@ -457,25 +457,64 @@ fun SettingsScreen(
     if (showHostDialog) {
         AlertDialog(
             onDismissRequest = { showHostDialog = false },
-            title = { Text("Raspberry Pi 5 Endpoint") },
+            title = { Text("Raspberry Pi 5 Connection Setup") },
             text = {
                 Column {
-                    Text("Enter the local IP address and port of your Raspberry Pi 5 cold storage controller server:")
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = "Raspberry Pi IP या Cloud Tunnel URL दर्ज करें:",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = hostInput,
                         onValueChange = { hostInput = it },
-                        label = { Text("API URL") },
+                        label = { Text("Server URL / IP") },
+                        placeholder = { Text("http://192.168.1.45:5000/") },
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = VxTheme.primaryBlue),
                         modifier = Modifier.fillMaxWidth()
                     )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = VxTheme.surfaceBlue,
+                        border = BorderStroke(1.dp, VxTheme.borderBlue)
+                    ) {
+                        Column(modifier = Modifier.padding(10.dp)) {
+                            Text(
+                                text = "📱 असली फोन पर (Same Wi-Fi):",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = VxTheme.primaryBlue
+                            )
+                            Text(
+                                text = "http://192.168.x.x:5000/ डालें (फोन और Pi एक ही Wi-Fi पर)।",
+                                fontSize = 10.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "💻 PC ब्राउज़र एम्यूलेटर में:",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = VxTheme.purple
+                            )
+                            Text(
+                                text = "Pi पर 'ngrok http 5000' चलाएं और मिला हुआ HTTPS URL यहाँ पेस्ट करें।",
+                                fontSize = 10.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                 }
             },
             confirmButton = {
                 Button(
                     onClick = {
                         onSetRaspberryPiHost(hostInput)
+                        onSetConnectionMode(com.example.data.model.ConnectionMode.RASPBERRY_PI)
                         showHostDialog = false
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = VxTheme.primaryBlue)

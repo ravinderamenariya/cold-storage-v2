@@ -143,9 +143,30 @@ class ColdStorageRepository(
     }
 
     fun updateRaspberryPiHost(host: String) {
-        val sanitized = if (host.endsWith("/")) host else "$host/"
-        _raspberryPiHost.value = sanitized
+        var clean = host.trim()
+        if (clean.isBlank()) return
+
+        if (!clean.startsWith("http://", ignoreCase = true) && !clean.startsWith("https://", ignoreCase = true)) {
+            clean = "http://$clean"
+        }
+
+        val isTunnel = clean.contains("ngrok", ignoreCase = true) || clean.contains("loca.lt", ignoreCase = true)
+        val authority = clean.substringAfter("://").substringBefore("/")
+        if (!authority.contains(":") && !isTunnel) {
+            // Append default port 5000 if not specified on local IP
+            clean = clean.replace(authority, "$authority:5000")
+        }
+
+        if (!clean.endsWith("/")) {
+            clean = "$clean/"
+        }
+
+        _raspberryPiHost.value = clean
+        _connectionMode.value = ConnectionMode.RASPBERRY_PI
         initRetrofit()
+        coroutineScope.launch(Dispatchers.IO) {
+            pollRaspberryPi()
+        }
     }
 
     fun setConnectionMode(mode: ConnectionMode) {
@@ -248,10 +269,9 @@ class ColdStorageRepository(
 
         try {
             // Verify health endpoint and fetch live telemetry
-            val healthResponse = api.getSystemHealth()
             val response = api.getLiveTelemetry()
 
-            if (healthResponse.isSuccessful && response.isSuccessful && response.body() != null) {
+            if (response.isSuccessful && response.body() != null) {
                 val data = response.body()!!
                 _deviceConnected.value = true
                 _lastUpdatedTime.value = System.currentTimeMillis()

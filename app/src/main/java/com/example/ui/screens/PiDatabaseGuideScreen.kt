@@ -196,6 +196,30 @@ fun PiDatabaseGuideScreen(
                                 .testTag("guide_pi_host_input")
                         )
 
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = VxTheme.surfaceBlue,
+                            border = BorderStroke(1.dp, VxTheme.borderBlue),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(10.dp)) {
+                                Text(
+                                    text = "💡 Connection Guide:",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = VxTheme.primaryBlue
+                                )
+                                Text(
+                                    text = "• PC Browser Emulator: Run 'ngrok http 5000' on Pi and paste the https://... URL here.\n• Physical Mobile Phone on same Wi-Fi: Run 'python3 green_cold_server.py' and enter http://<PI_IP>:5000/.",
+                                    fontSize = 10.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    lineHeight = 14.sp
+                                )
+                            }
+                        }
+
                         Spacer(modifier = Modifier.height(10.dp))
 
                         Button(
@@ -548,71 +572,176 @@ CREATE TABLE IF NOT EXISTS crates (
         ) {
             CodeSnippet(
                 code = """
-import sqlite3, datetime, time
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
+# ==============================================================================
+# GREENCOLD / VISION X - Integrated Hardware & REST API Gateway (green_cold_server.py)
+# ==============================================================================
+# Requirements:
+#   pip install flask flask-cors adafruit-circuitpython-dht gpiozero pillow adafruit-circuitpython-rgb-display
+#
+# Run on Raspberry Pi:
+#   python3 green_cold_server.py
 
-app = FastAPI(title="VISION X Pi 5 Cold Storage Gateway")
+import time, threading, datetime
+import board, digitalio, adafruit_dht
+from gpiozero import Servo
+from PIL import Image, ImageDraw, ImageFont
+import adafruit_rgb_display.st7735 as st7735
+from flask import Flask, jsonify, request
+from flask_cors import CORS
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# --- HARDWARE CONFIGURATION ---
+MQ_ACTIVE_LOW = True
+RELAY_ACTIVE_LOW = True
 
-DB_PATH = "visionx_storage.db"
+# DHT11 Sensors
+dht_ch1 = adafruit_dht.DHT11(board.D17)      # GPIO17
+dht_ch2 = adafruit_dht.DHT11(board.D26)      # GPIO26
+dht_outside = adafruit_dht.DHT11(board.D22)  # GPIO22
 
-actuators = {"cooling": True, "fans": True, "door": False}
+# MQ Sensors
+mq137 = digitalio.DigitalInOut(board.D4)     # GPIO4
+mq137.direction = digitalio.Direction.INPUT
+mq2 = digitalio.DigitalInOut(board.D23)      # GPIO23
+mq2.direction = digitalio.Direction.INPUT
 
-@app.get("/api/live")
-def get_live_telemetry():
-    # Poll physical hardware sensors or simulated fallbacks
-    data = {
+# Fan Relays
+fan1 = digitalio.DigitalInOut(board.D19)     # GPIO19
+fan2 = digitalio.DigitalInOut(board.D16)     # GPIO16
+for relay in (fan1, fan2):
+    relay.direction = digitalio.Direction.OUTPUT
+    relay.value = RELAY_ACTIVE_LOW
+
+# Servos
+servo1 = Servo(12, min_pulse_width=0.0005, max_pulse_width=0.0025)  # GPIO12
+servo2 = Servo(13, min_pulse_width=0.0005, max_pulse_width=0.0025)  # GPIO13
+
+# ST7735 Display
+spi = board.SPI()
+cs_pin = digitalio.DigitalInOut(board.D6)
+dc_pin = digitalio.DigitalInOut(board.D5)
+rst_pin = digitalio.DigitalInOut(board.D25)
+display = st7735.ST7735R(spi, cs=cs_pin, dc=dc_pin, rst=rst_pin, baudrate=24000000, width=128, height=160)
+
+# Global Telemetry State
+sensor_data = {
+    "CH1": {"temp": 12.0, "hum": 65.0},
+    "CH2": {"temp": 4.0, "hum": 60.0},
+    "OUT": {"temp": 28.0, "hum": 62.0}
+}
+live_state = {
+    "gas1": False,
+    "gas2": False,
+    "f1_running": False,
+    "f2_running": False,
+    "cooling_enabled": True
+}
+
+def set_servo_angle_stable(servo_obj, angle):
+    val = (angle / 90.0) - 1.0
+    servo_obj.value = max(-1.0, min(1.0, val))
+
+set_servo_angle_stable(servo1, 5)
+set_servo_angle_stable(servo2, 5)
+
+def read_dht(sensor, name):
+    try:
+        t = sensor.temperature
+        h = sensor.humidity
+        if t is not None and h is not None:
+            sensor_data[name]["temp"] = float(t)
+            sensor_data[name]["hum"] = float(h)
+    except Exception:
+        pass
+
+def hardware_loop():
+    print("[HARDWARE] Monitoring loop active...")
+    while True:
+        try:
+            read_dht(dht_ch1, "CH1")
+            read_dht(dht_ch2, "CH2")
+            read_dht(dht_outside, "OUT")
+
+            gas1 = not mq137.value if MQ_ACTIVE_LOW else mq137.value
+            gas2 = not mq2.value if MQ_ACTIVE_LOW else mq2.value
+            live_state["gas1"] = gas1
+            live_state["gas2"] = gas2
+
+            # Relay & Servo controls
+            if gas1:
+                fan1.value = not RELAY_ACTIVE_LOW
+                set_servo_angle_stable(servo1, 60)
+                live_state["f1_running"] = True
+            else:
+                fan1.value = RELAY_ACTIVE_LOW
+                set_servo_angle_stable(servo1, 5)
+                live_state["f1_running"] = False
+
+            if gas2:
+                fan2.value = not RELAY_ACTIVE_LOW
+                set_servo_angle_stable(servo2, 60)
+                live_state["f2_running"] = True
+            else:
+                fan2.value = RELAY_ACTIVE_LOW
+                set_servo_angle_stable(servo2, 5)
+                live_state["f2_running"] = False
+
+            time.sleep(2.0)
+        except Exception as e:
+            time.sleep(1.0)
+
+# --- FLASK REST API FOR MOBILE APP ---
+app = Flask(__name__)
+CORS(app)
+
+@app.route('/api/health', methods=['GET'])
+def get_health():
+    return jsonify({"status": "online", "device": "GREENCOLD Raspberry Pi 5"})
+
+@app.route('/api/live', methods=['GET'])
+def get_live():
+    return jsonify({
         "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
-        "chamber1": {"temperature": 12.0, "humidity": 62.0},
-        "chamber2": {"temperature": 4.0, "humidity": 60.0},
-        "outside": {"temperature": 28.5, "humidity": 62.0},
-        "gasStatus": "normal",
+        "chamber1": {
+            "temperature": sensor_data["CH1"]["temp"],
+            "humidity": sensor_data["CH1"]["hum"]
+        },
+        "chamber2": {
+            "temperature": sensor_data["CH2"]["temp"],
+            "humidity": sensor_data["CH2"]["hum"]
+        },
+        "outside": {
+            "temperature": sensor_data["OUT"]["temp"],
+            "humidity": sensor_data["OUT"]["hum"]
+        },
+        "gasStatus": "alert" if (live_state["gas1"] or live_state["gas2"]) else "normal",
         "solarPower": 620.0,
         "battery": 78,
-        "cooling": actuators["cooling"],
-        "fans": actuators["fans"],
-        "doorOpen": actuators["door"]
-    }
-    log_to_sqlite(data)
-    return data
+        "cooling": live_state["cooling_enabled"],
+        "fans": live_state["f1_running"] or live_state["f2_running"],
+        "doorOpen": False
+    })
 
-@app.post("/api/control/cooling")
-def set_cooling(enabled: bool):
-    actuators["cooling"] = enabled
-    return {"cooling": actuators["cooling"]}
+@app.route('/api/control/cooling', methods=['POST'])
+def toggle_cooling():
+    enabled = request.args.get('enabled', 'true').lower() == 'true'
+    live_state["cooling_enabled"] = enabled
+    return jsonify({"cooling": enabled})
 
-@app.post("/api/control/fans")
-def set_fans(enabled: bool):
-    actuators["fans"] = enabled
-    return {"fans": actuators["fans"]}
+@app.route('/api/control/fans', methods=['POST'])
+def toggle_fans():
+    enabled = request.args.get('enabled', 'true').lower() == 'true'
+    fan1.value = not RELAY_ACTIVE_LOW if enabled else RELAY_ACTIVE_LOW
+    fan2.value = not RELAY_ACTIVE_LOW if enabled else RELAY_ACTIVE_LOW
+    live_state["f1_running"] = enabled
+    live_state["f2_running"] = enabled
+    return jsonify({"fans": enabled})
 
-def log_to_sqlite(data):
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        cur = conn.cursor()
-        cur.execute('''INSERT INTO telemetry 
-            (chamber1_temp, chamber1_hum, chamber2_temp, chamber2_hum, outside_temp, outside_hum, gas_status, solar_watts, battery_percent, cooling_on, fans_on, door_open)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-            (data["chamber1"]["temperature"], data["chamber1"]["humidity"],
-             data["chamber2"]["temperature"], data["chamber2"]["humidity"],
-             data["outside"]["temperature"], data["outside"]["humidity"],
-             data["gasStatus"], data["solarPower"], data["battery"],
-             int(data["cooling"]), int(data["fans"]), int(data["doorOpen"])))
-        conn.commit()
-        conn.close()
-    except Exception as e:
-        print("SQLite Log Error:", e)
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=5000)
+if __name__ == '__main__':
+    # Start hardware sensor/actuator loop in background thread
+    t = threading.Thread(target=hardware_loop, daemon=True)
+    t.start()
+    print("[SERVER] Starting GREENCOLD Mobile API on 0.0.0.0:5000...")
+    app.run(host='0.0.0.0', port=5000)
                 """.trimIndent()
             )
         }
